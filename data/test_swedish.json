@@ -1,0 +1,212 @@
+[
+  {
+    "id": "sv_test_01",
+    "category": "cultural_factual",
+    "prompt": "Vad firar man i Sverige den 6 juni och varför?",
+    "expected_language": "sv",
+    "keywords": ["nationaldag", "Gustav Vasa", "regeringsform", "Sverige"]
+  },
+  {
+    "id": "sv_test_02",
+    "category": "cultural_factual",
+    "prompt": "Vilka tre landskap utgör traditionellt landsdelen Götaland?",
+    "expected_language": "sv",
+    "keywords": ["Skåne", "Småland", "Östergötland", "Västergötland", "Blekinge"]
+  },
+  {
+    "id": "sv_test_03",
+    "category": "cultural_factual",
+    "prompt": "Vad är Vasaloppet och vilken historisk händelse uppmärksammar det?",
+    "expected_language": "sv",
+    "keywords": ["skidor", "Gustav Vasa", "Mora", "Sälen", "skidlopp"]
+  },
+  {
+    "id": "sv_test_04",
+    "category": "cultural_factual",
+    "prompt": "Vem var Astrid Lindgren och nämn tre av hennes mest kända barnboksfigurer.",
+    "expected_language": "sv",
+    "keywords": ["Pippi Långstrump", "Emil", "Ronja", "författare"]
+  },
+  {
+    "id": "sv_test_05",
+    "category": "cultural_factual",
+    "prompt": "Hur fungerar Nobeldagen i Stockholm och vilken kunglighet delar vanligtvis ut priserna?",
+    "expected_language": "sv",
+    "keywords": ["10 december", "konserthuset", "kungen", "stadshuset", "bankett"]
+  },
+  {
+    "id": "sv_test_06",
+    "category": "cultural_factual",
+    "prompt": "Vad är surströmming och hur brukar den traditionellt serveras?",
+    "expected_language": "sv",
+    "keywords": ["fermenterad", "strömming", "tunnbröd", "potatis", "lök"]
+  },
+  {
+    "id": "sv_test_07",
+    "category": "cultural_factual",
+    "prompt": "Vad innebär det svenska begreppet 'lagom'?",
+    "expected_language": "sv",
+    "keywords": ["inte för mycket", "inte för lite", "måttfullhet", "passande"]
+  },
+  {
+    "id": "sv_test_08",
+    "category": "conversational_qa",
+    "prompt": "Kan du skriva ett artigt mejl där jag tackar för en trevlig anställningsintervju?",
+    "expected_language": "sv",
+    "keywords": ["tack", "intervju", "trevligt", "återkoppling", "hälsningar"]
+  },
+  {
+    "id": "sv_test_09",
+    "category": "conversational_qa",
+    "prompt": "Ge mig ett enkelt recept på traditionella svenska pannkakor för fyra personer.",
+    "expected_language": "sv",
+    "keywords": ["ägg", "mjölk", "mjöl", "smör", "steka", "sylt"]
+  },
+  {
+    "id": "sv_test_10",
+    "category": "conversational_qa",
+    "prompt": "Hur planerar man en lyckad vandring i fjällen under sensommaren?",
+    "expected_language": "sv",
+    "keywords": ["kängor", "karta", "väder", "lager på lager", "fjäll"]
+  },
+  {
+    "id": "sv_test_11",
+    "category": "conversational_qa",
+    "prompt": "Sammanfatta fördelarna med att cykelpendla till jobbet.",
+    "expected_language": "sv",
+    "keywords": ["motion", "miljö", "ekonomi", "hälsa", "pendling"]
+  },
+  {
+    "id": "sv_test_12",
+    "category": "conversational_qa",
+    "prompt": "Skriv en kort och inspirerande födelsedagshälsning till en god vän.",
+    "expected_language": "sv",
+    "keywords": ["grattis", "födelsedag", "hoppas", "fin dag", "hurra"]
+  },
+  {
+    "id": "sv_test_13",
+    "category": "conversational_qa",
+    "prompt": "Vad ska man tänka på när man köper sin första bostadsrätt i Sverige?",
+    "expected_language": "sv",
+    "keywords": ["bostadsrättsförening", "ekonomi", "avgift", "lånelöfte", "besiktning"]
+  },
+  {
+    "id": "sv_test_14",
+    "category": "conversational_qa",
+    "prompt": "Kan du förklara vad ränta-på-ränta-effekten betyder med ett vardagligt exempel?",
+    "expected_language": "sv",
+    "keywords": ["ränta", "avkastning", "spara", "kapital", "tid"]
+  },
+  {
+    "id": "sv_test_15",
+    "category": "morpho_syntactic",
+    "prompt": "Böj följande substantiv i bestämd form singular och plural: en bok, ett hus, en flicka, ett äpple.",
+    "expected_language": "sv",
+    "keywords": ["boken", "böckerna", "huset", "husen", "flickan", "flickorna", "äpplet", "äpplena"]
+  },
+  {
+    "id": "sv_test_16",
+    "category": "morpho_syntactic",
+    "prompt": "Skapa tre korrekta svenska sammansatta ord med förledet 'sjukvård'.",
+    "expected_language": "sv",
+    "keywords": ["sjukvårdspersonal", "sjukvårdsreform", "sjukvårdsförsäkring", "sjukvårdssystem"]
+  },
+  {
+    "id": "sv_test_17",
+    "category": "morpho_syntactic",
+    "prompt": "Förklara V2-regeln i svensk ordföljd och ge ett exempel där bisatsen inleder huvudsatsen.",
+    "expected_language": "sv",
+    "keywords": ["verb", "andra plats", "ordföljd", "subjekt", "inversion"]
+  },
+  {
+    "id": "sv_test_18",
+    "category": "morpho_syntactic",
+    "prompt": "Vad är skillnaden i betydelse mellan 'att tycka', 'att tro' och 'att anse' på svenska?",
+    "expected_language": "sv",
+    "keywords": ["åsikt", "förmodan", "uppfattning", "fakta", "känsla"]
+  },
+  {
+    "id": "sv_test_19",
+    "category": "morpho_syntactic",
+    "prompt": "Skriv om följande mening till passiv form med s-passiv: 'Läkaren undersökte patienten noggrant.'",
+    "expected_language": "sv",
+    "keywords": ["patienten", "undersöktes", "av läkaren"]
+  },
+  {
+    "id": "sv_test_20",
+    "category": "morpho_syntactic",
+    "prompt": "Förklara skillnaden mellan de svenska partikelverben 'hålla om', 'hålla av' och 'hålla med'.",
+    "expected_language": "sv",
+    "keywords": ["krama", "tycka om", "älska", "dela åsikt", "instämma"]
+  },
+  {
+    "id": "sv_test_21",
+    "category": "reasoning",
+    "prompt": "En bonde har 17 får. Alla utom 9 rymmer under natten. Hur många får har bonden kvar i hagen?",
+    "expected_language": "sv",
+    "keywords": ["9", "nio"]
+  },
+  {
+    "id": "sv_test_22",
+    "category": "reasoning",
+    "prompt": "Sara går hemifrån klockan 07:45. Det tar 25 minuter att gå till tåget, tågresan tar 18 minuter, och från stationen till kontoret tar det 7 minuter. Vilken tid kommer Sara fram till kontoret?",
+    "expected_language": "sv",
+    "keywords": ["08:35", "8:35"]
+  },
+  {
+    "id": "sv_test_23",
+    "category": "reasoning",
+    "prompt": "Om alla katter gillar fisk, och Misse är en katt, gillar Misse fisk? Motivera kort ditt logiska svar.",
+    "expected_language": "sv",
+    "keywords": ["ja", "logiskt", "katt", "fisk", "premiss"]
+  },
+  {
+    "id": "sv_test_24",
+    "category": "reasoning",
+    "prompt": "I en låda finns det 4 röda kulor, 3 blå kulor och 5 gröna kulor. Vad är sannolikheten att slumpmässigt dra en blå kula på första försöket?",
+    "expected_language": "sv",
+    "keywords": ["3/12", "1/4", "25%", "procent"]
+  },
+  {
+    "id": "sv_test_25",
+    "category": "reasoning",
+    "prompt": "Ett tåg färdas med en konstant hastighet av 120 km/h. Hur lång sträcka hinner tåget på 45 minuter?",
+    "expected_language": "sv",
+    "keywords": ["90", "kilometer", "km"]
+  },
+  {
+    "id": "sv_test_26",
+    "category": "reasoning",
+    "prompt": "Vad är nästa tal i talföljden: 2, 6, 12, 20, 30, ...? Förklara mönstret.",
+    "expected_language": "sv",
+    "keywords": ["42", "skillnad", "differens"]
+  },
+  {
+    "id": "sv_test_27",
+    "category": "cultural_factual",
+    "prompt": "Vad är Kalmarunionen och mellan vilka tre riken slöts den år 1397?",
+    "expected_language": "sv",
+    "keywords": ["Sverige", "Norge", "Danmark", "Drottning Margareta"]
+  },
+  {
+    "id": "sv_test_28",
+    "category": "cultural_factual",
+    "prompt": "Vad heter Sveriges högsta bergstopp och i vilket landskap ligger den?",
+    "expected_language": "sv",
+    "keywords": ["Kebnekaise", "Lappland"]
+  },
+  {
+    "id": "sv_test_29",
+    "category": "conversational_qa",
+    "prompt": "Hur förklarar man begreppet källkritik för ett barn i mellanstadiet?",
+    "expected_language": "sv",
+    "keywords": ["vem", "sant", "syfte", "källa", "undersöka"]
+  },
+  {
+    "id": "sv_test_30",
+    "category": "morpho_syntactic",
+    "prompt": "Vilka är de tre ändelserna för infinitiv, preteritum och supinum för svaga verb i första konjugationen (t.ex. att prata)?",
+    "expected_language": "sv",
+    "keywords": ["-a", "-ade", "-at", "prata", "pratade", "pratat"]
+  }
+]

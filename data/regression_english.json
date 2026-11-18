@@ -1,0 +1,142 @@
+[
+  {
+    "id": "en_reg_01",
+    "category": "factual_qa",
+    "prompt": "What is the capital of Canada and what is its official currency?",
+    "expected_language": "en",
+    "keywords": ["Ottawa", "Canadian Dollar"]
+  },
+  {
+    "id": "en_reg_02",
+    "category": "factual_qa",
+    "prompt": "Who proposed the general theory of relativity and in what year was it published?",
+    "expected_language": "en",
+    "keywords": ["Albert Einstein", "1915"]
+  },
+  {
+    "id": "en_reg_03",
+    "category": "science",
+    "prompt": "Explain briefly why the sky appears blue during the day.",
+    "expected_language": "en",
+    "keywords": ["Rayleigh scattering", "wavelength", "atmosphere", "blue light"]
+  },
+  {
+    "id": "en_reg_04",
+    "category": "reasoning",
+    "prompt": "If a shirt costs $20 after a 20% discount, what was its original price?",
+    "expected_language": "en",
+    "keywords": ["$25", "25 dollars", "original price"]
+  },
+  {
+    "id": "en_reg_05",
+    "category": "reasoning",
+    "prompt": "David is twice as old as his sister. In 5 years, he will be 15. How old is his sister now?",
+    "expected_language": "en",
+    "keywords": ["5", "five years old"]
+  },
+  {
+    "id": "en_reg_06",
+    "category": "reasoning",
+    "prompt": "All roses are flowers. Some flowers fade quickly. Does it follow that all roses fade quickly?",
+    "expected_language": "en",
+    "keywords": ["no", "does not follow", "invalid", "some"]
+  },
+  {
+    "id": "en_reg_07",
+    "category": "grammar_syntax",
+    "prompt": "Identify the grammatical error in this sentence and correct it: 'Neither of the students were prepared for the exam.'",
+    "expected_language": "en",
+    "keywords": ["was", "neither", "singular", "subject-verb agreement"]
+  },
+  {
+    "id": "en_reg_08",
+    "category": "grammar_syntax",
+    "prompt": "Rewrite the following sentence from passive voice into active voice: 'The innovative software was developed by a team of three engineers.'",
+    "expected_language": "en",
+    "keywords": ["A team of three engineers developed the innovative software."]
+  },
+  {
+    "id": "en_reg_09",
+    "category": "conversational",
+    "prompt": "Give three practical tips for managing work-related stress during busy weeks.",
+    "expected_language": "en",
+    "keywords": ["prioritize", "breaks", "boundaries", "exercise", "sleep"]
+  },
+  {
+    "id": "en_reg_10",
+    "category": "conversational",
+    "prompt": "Draft a polite two-sentence email informing a colleague that you will be 10 minutes late to a meeting.",
+    "expected_language": "en",
+    "keywords": ["running 10 minutes late", "apologies", "start without me", "meeting"]
+  },
+  {
+    "id": "en_reg_11",
+    "category": "coding_reasoning",
+    "prompt": "What is the time complexity of searching for an element in a balanced binary search tree, and why?",
+    "expected_language": "en",
+    "keywords": ["O(log n)", "logarithmic", "halving", "height"]
+  },
+  {
+    "id": "en_reg_12",
+    "category": "science",
+    "prompt": "What is the primary function of mitochondria in eukaryotic cells?",
+    "expected_language": "en",
+    "keywords": ["ATP", "energy", "cellular respiration", "powerhouse"]
+  },
+  {
+    "id": "en_reg_13",
+    "category": "reasoning",
+    "prompt": "If you have a 3-liter bucket and a 5-liter bucket, how can you measure exactly 4 liters of water?",
+    "expected_language": "en",
+    "keywords": ["fill", "pour", "4 liters", "empty"]
+  },
+  {
+    "id": "en_reg_14",
+    "category": "factual_qa",
+    "prompt": "What is the difference between machine learning and deep learning?",
+    "expected_language": "en",
+    "keywords": ["neural networks", "subset", "representation learning", "feature engineering"]
+  },
+  {
+    "id": "en_reg_15",
+    "category": "grammar_syntax",
+    "prompt": "Explain the difference between 'affect' and 'effect' with one example of each.",
+    "expected_language": "en",
+    "keywords": ["verb", "noun", "impact", "result"]
+  },
+  {
+    "id": "en_reg_16",
+    "category": "reasoning",
+    "prompt": "Which is heavier: a pound of gold or a pound of feathers? Explain your answer.",
+    "expected_language": "en",
+    "keywords": ["same", "weigh the same", "one pound"]
+  },
+  {
+    "id": "en_reg_17",
+    "category": "creative_writing",
+    "prompt": "Write a single evocative sentence describing an old lighthouse standing against a midnight storm.",
+    "expected_language": "en",
+    "keywords": ["waves", "beacon", "storm", "light", "darkness"]
+  },
+  {
+    "id": "en_reg_18",
+    "category": "factual_qa",
+    "prompt": "What are the three branches of the United States federal government?",
+    "expected_language": "en",
+    "keywords": ["Executive", "Legislative", "Judicial"]
+  },
+  {
+    "id": "en_reg_19",
+    "category": "reasoning",
+    "prompt": "A clock strikes 6 in 5 seconds. How long will it take to strike 12?",
+    "expected_language": "en",
+    "keywords": ["11 seconds", "intervals", "seconds"]
+  },
+  {
+    "id": "en_reg_20",
+    "category": "conversational",
+    "prompt": "How does compound interest differ from simple interest?",
+    "expected_language": "en",
+    "keywords": ["principal", "accumulated interest", "exponential", "linear"]
+  }
+]

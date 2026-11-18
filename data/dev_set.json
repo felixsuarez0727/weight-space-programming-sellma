@@ -1,0 +1,72 @@
+[
+  {
+    "id": "dev_01",
+    "category": "factual",
+    "prompt": "Vad är skillnaden mellan en sjö och ett hav?",
+    "expected_language": "sv",
+    "keywords": ["sjö", "hav", "saltvatten", "sötvatten", "vatten"]
+  },
+  {
+    "id": "dev_02",
+    "category": "cultural",
+    "prompt": "Vad innebär allemansrätten i Sverige?",
+    "expected_language": "sv",
+    "keywords": ["natur", "inte störa", "inte förstöra", "tälta", "plocka"]
+  },
+  {
+    "id": "dev_03",
+    "category": "science",
+    "prompt": "Förklara kortfattat hur fotosyntes fungerar.",
+    "expected_language": "sv",
+    "keywords": ["soljus", "koldioxid", "syre", "glukos", "växter"]
+  },
+  {
+    "id": "dev_04",
+    "category": "reasoning",
+    "prompt": "Om Anna är äldre än Björn, och Björn är äldre än Carl, vem är då yngst av de tre?",
+    "expected_language": "sv",
+    "keywords": ["Carl", "yngst"]
+  },
+  {
+    "id": "dev_05",
+    "category": "idiom",
+    "prompt": "Vad betyder det svenska ordspråket 'Borta bra men hemma bäst'?",
+    "expected_language": "sv",
+    "keywords": ["hemma", "bäst", "trivas", "resa"]
+  },
+  {
+    "id": "dev_06",
+    "category": "civics",
+    "prompt": "Hur många ledamöter sitter i Sveriges riksdag och hur ofta hålls ordinarie val?",
+    "expected_language": "sv",
+    "keywords": ["349", "riksdagen", "fyra år", "val"]
+  },
+  {
+    "id": "dev_07",
+    "category": "conversational",
+    "prompt": "Kan du ge mig tre konkreta tips för att förbättra min sömn?",
+    "expected_language": "sv",
+    "keywords": ["sömn", "rutiner", "mörkt", "skärmar", "temperatur"]
+  },
+  {
+    "id": "dev_08",
+    "category": "science",
+    "prompt": "Varför skiftar trädens löv färg på hösten i Norden?",
+    "expected_language": "sv",
+    "keywords": ["klorofyll", "höst", "löv", "näring", "färger"]
+  },
+  {
+    "id": "dev_09",
+    "category": "cultural",
+    "prompt": "Beskriv vad en klassisk svensk 'fika' är och vad man brukar äta.",
+    "expected_language": "sv",
+    "keywords": ["kaffe", "kanelbulle", "kaka", "fika", "gemenskap"]
+  },
+  {
+    "id": "dev_10",
+    "category": "geography",
+    "prompt": "Vilken är Danmarks huvudstad och vad heter sundet mellan Danmark och Sverige?",
+    "expected_language": "sv",
+    "keywords": ["Köpenhamn", "Öresund"]
+  }
+]
