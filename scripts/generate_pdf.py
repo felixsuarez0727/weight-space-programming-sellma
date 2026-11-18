@@ -14,12 +14,8 @@ DOCS_DIR = ROOT_DIR / "docs"
 EDGE_EXE = Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
 
 
-def render_math_equations(text: str) -> str:
-    """
-    Convert all LaTeX math expressions (display $$...$$ and inline $...$)
-    into clean, publication-ready semantic HTML with zero remaining raw $ or LaTeX markup.
-    """
-    # 1. Display Equations ($$...$$)
+def get_display_equation_html(raw: str) -> str:
+    """Return publication-grade semantic HTML for display equations."""
     eq1_html = """
 <div class="math-display">
   <i>d</i><sub><i>l</i></sub> = 
@@ -53,20 +49,17 @@ def render_math_equations(text: str) -> str:
   &Delta;<i>W</i><sub>down</sub><sup>(<i>l</i>)</sup> = &alpha; &middot; <i>d</i><sub><i>l</i></sub> &otimes; <i>u</i><sub><i>l</i></sub><sup><i>T</i></sup> = &alpha; &middot; <i>d</i><sub><i>l</i></sub> <i>u</i><sub><i>l</i></sub><sup><i>T</i></sup> &isin; &#8477;<sup><i>d</i> &times; <i>d</i><sub>ff</sub></sup>
 </div>"""
 
-    def replace_display_block(match):
-        raw = match.group(1).strip()
-        if "d_l" in raw and ("bar{h}" in raw or "h_{sv}" in raw):
-            return eq1_html
-        elif "u_{l" in raw or "begin{cases}" in raw:
-            return eq2_html
-        elif "Delta W_{down}" in raw:
-            return eq3_html
-        return f'<div class="math-display">{raw}</div>'
+    if "d_l" in raw and ("bar{h}" in raw or "h_{sv}" in raw):
+        return eq1_html
+    elif "u_{l" in raw or "begin{cases}" in raw:
+        return eq2_html
+    elif "Delta W_{down}" in raw:
+        return eq3_html
+    return f'<div class="math-display">{raw}</div>'
 
-    # Replace all $$...$$ display blocks regardless of whitespace or indentation
-    text = re.sub(r"\$\$(.*?)\$\$", replace_display_block, text, flags=re.DOTALL)
 
-    # 2. Known Complex Inline Math Replacements (sorted by length descending so longer patterns match first!)
+def render_inline_math(html: str) -> str:
+    """Convert inline LaTeX math expressions ($...$) to clean semantic HTML."""
     exact_inline_map = [
         (
             r"$\mathcal{P} = \exp\left(-\frac{1}{N_{tok}}\sum \log P(x_i)\right)$",
@@ -145,20 +138,20 @@ def render_math_equations(text: str) -> str:
         (r"$0.600$", '<span class="math-inline">0.600</span>'),
     ]
 
-    # Sort by raw pattern length descending
+    # Sort by length descending so longer patterns match first
     exact_inline_map.sort(key=lambda x: len(x[0]), reverse=True)
 
     for raw, repl in exact_inline_map:
-        text = text.replace(raw, repl)
+        html = html.replace(raw, repl)
 
-    # 3. Dynamic regex replacements for $N=...$
-    text = re.sub(
+    # Dynamic regex replacements for $N=...$
+    html = re.sub(
         r"\$N\s*=\s*(\d+)\$",
         r'<span class="math-inline"><i>N</i> = \1</span>',
-        text,
+        html,
     )
 
-    # 4. Fallback cleanup: catch any remaining simple $...$ inline math
+    # Fallback generic inline math cleanup
     def clean_generic_math(match):
         inner = match.group(1).strip()
         inner = inner.replace(r"\alpha", "&alpha;")
@@ -174,9 +167,8 @@ def render_math_equations(text: str) -> str:
         inner = re.sub(r"([A-Za-z]+)_([A-Za-z0-9]+)", r"<i>\1</i><sub>\2</sub>", inner)
         return f'<span class="math-inline">{inner}</span>'
 
-    text = re.sub(r"\$([^\$\n]+?)\$", clean_generic_math, text)
-
-    return text
+    html = re.sub(r"\$([^\$\n]+?)\$", clean_generic_math, html)
+    return html
 
 
 def markdown_to_html(md_text: str) -> str:
@@ -201,21 +193,40 @@ def markdown_to_html(md_text: str) -> str:
 
     processed_md = mermaid_pattern.sub(replace_mermaid, md_text)
 
-    # Convert all LaTeX math equations to clean HTML BEFORE markdown rendering
-    processed_md = render_math_equations(processed_md)
+    # 1. Protect all display math blocks ($$...$$) using unique placeholders
+    # so they NEVER break Markdown list/block parsing
+    display_placeholders = {}
 
-    # Initialize markdown parser with GFM tables
+    def extract_display_math(match):
+        idx = len(display_placeholders)
+        placeholder_key = f"DISPLAYMATHPLACEHOLDER{idx}XYZ"
+        raw_eq = match.group(1).strip()
+        display_placeholders[placeholder_key] = get_display_equation_html(raw_eq)
+        return f"\n\n{placeholder_key}\n\n"
+
+    processed_md = re.sub(r"\$\$(.*?)\$\$", extract_display_math, processed_md, flags=re.DOTALL)
+
+    # 2. Render all inline math expressions to clean inline HTML BEFORE Markdown parsing
+    # so underscores inside math (e.g. d_{rand}) are never mangled into <em> italics
+    processed_md = render_inline_math(processed_md)
+
+    # 3. Render Markdown to HTML via markdown_it (GFM-like)
     md = markdown_it.MarkdownIt("gfm-like").disable("linkify")
     rendered_body = md.render(processed_md)
 
-    # Replace relative plot image path with file URI
+    # 4. Substitute display math placeholders back into the HTML
+    for placeholder_key, eq_html in display_placeholders.items():
+        rendered_body = rendered_body.replace(f"<p>{placeholder_key}</p>", eq_html)
+        rendered_body = rendered_body.replace(placeholder_key, eq_html)
+
+    # 5. Replace relative plot image path with file URI
     rendered_body = re.sub(
         r'src="(?:\.\./results/plots/comparison_metrics\.png|results/plots/comparison_metrics\.png)"',
         f'src="{abs_plot_path}"',
         rendered_body,
     )
 
-    # Ensure link to AI_USAGE.md points to online repository for standalone PDF viewing
+    # 6. Ensure link to AI_USAGE.md points to online repository for standalone PDF viewing
     rendered_body = re.sub(
         r'href="(?:\.\./AI_USAGE\.md|AI_USAGE\.md)"',
         'href="https://github.com/felixsuarez0727/weight-space-programming-sellma/blob/main/AI_USAGE.md"',

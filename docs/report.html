@@ -269,6 +269,7 @@
 <ul>
 <li><strong>Calibration Dev Set (<span class="math-inline"><i>N</i> = 10</span> paired prompts):</strong> Used strictly to extract the language steering vectors and calibrate hyper-parameters. For each prompt pair, inputs were formatted using <code>tokenizer.apply_chat_template(..., add_generation_prompt=True)</code>. We recorded mean residual activations at the final prompt token position across layers 14 and 16, computing unit steering direction <span class="math-inline"><i>d</i><sub><i>l</i></sub></span>:</li>
 </ul>
+
 <div class="math-display">
   <i>d</i><sub><i>l</i></sub> = 
   <span class="math-fraction">
@@ -277,15 +278,18 @@
   </span>
   &isin; &#8477;<sup><i>d</i></sup>
 </div>
-* **Held-Out Swedish Test Suite (<span class="math-inline"><i>N</i> = 30</span> prompts):** Completely unobserved during calibration, stratified into four categories: *Cultural/Factual* (<span class="math-inline"><i>N</i> = 9</span>), *Conversational QA* (<span class="math-inline"><i>N</i> = 8</span>), *Morpho-Syntactic* (<span class="math-inline"><i>N</i> = 7</span>), and *Reasoning* (<span class="math-inline"><i>N</i> = 6</span>).
-* **English Regression Control Suite (<span class="math-inline"><i>N</i> = 20</span> prompts):** Standard English factual, mathematical, and coding queries to test for collateral forgetting.
-* **Swedish Perplexity Reference Corpus (<span class="math-inline"><i>N</i> = 12</span> natural sentences):** Used to compute token-weighted exponentiated cross-entropy loss <span class="math-inline"><i>P</i> = exp(&minus; <sup>1</sup>/<sub><i>N</i><sub>tok</sub></sub> &sum; log <i>P</i>(<i>x</i><sub><i>i</i></sub>))</span> as an objective measure of language model fluency.
+<ul>
+<li><strong>Held-Out Swedish Test Suite (<span class="math-inline"><i>N</i> = 30</span> prompts):</strong> Completely unobserved during calibration, stratified into four categories: <em>Cultural/Factual</em> (<span class="math-inline"><i>N</i> = 9</span>), <em>Conversational QA</em> (<span class="math-inline"><i>N</i> = 8</span>), <em>Morpho-Syntactic</em> (<span class="math-inline"><i>N</i> = 7</span>), and <em>Reasoning</em> (<span class="math-inline"><i>N</i> = 6</span>).</li>
+<li><strong>English Regression Control Suite (<span class="math-inline"><i>N</i> = 20</span> prompts):</strong> Standard English factual, mathematical, and coding queries to test for collateral forgetting.</li>
+<li><strong>Swedish Perplexity Reference Corpus (<span class="math-inline"><i>N</i> = 12</span> natural sentences):</strong> Used to compute token-weighted exponentiated cross-entropy loss <span class="math-inline"><i>P</i> = exp(− <sup>1</sup>/<sub><i>N</i><sub>tok</sub></sub> ∑ log <i>P</i>(<i>x</i><sub><i>i</i></sub>))</span> as an objective measure of language model fluency.</li>
+</ul>
 <h3>3.2 Six Controlled Experimental Conditions</h3>
 <ol>
 <li><strong>M0 (Baseline):</strong> Unaltered model evaluated with raw user prompts.</li>
 <li><strong>M1 (Prompt Control):</strong> Unaltered model with an explicit Swedish system instruction (<em>&quot;Du är en svenskspråkig AI-assistent. Svara alltid och uteslutande på flytande och korrekt svenska.&quot;</em>).</li>
 <li><strong>M2 (WSP Targeted Surgery):</strong> Rank-1 surgical update applied to <span class="math-inline"><i>W</i><sub>down</sub> ∈ ℝ<sup><i>d</i> × <i>d</i><sub>ff</sub></sup></span> in layers 14 and 16. We first project the columns of <span class="math-inline"><i>W</i><sub>down</sub><sup>(<i>l</i>)</sup></span> onto the steering direction <span class="math-inline"><i>d</i><sub><i>l</i></sub></span> to compute signed neuron alignments <span class="math-inline"><i>a</i><sub><i>l</i>, <i>j</i></sub> = <i>d</i><sub><i>l</i></sub><sup><i>T</i></sup> <i>W</i><sub>down</sub><sup>(<i>l</i>)</sup>[:, <i>j</i>]</span> for all intermediate neurons <span class="math-inline"><i>j</i> ∈ {1, …, <i>d</i><sub>ff</sub>}</span>. We select the set <span class="math-inline"><i>T</i><sub><i>l</i></sub></span> of top-<span class="math-inline"><i>k</i></span> neurons (<span class="math-inline"><i>k</i> = 48</span>) with largest magnitude <span class="math-inline">|<i>a</i><sub><i>l</i>, <i>j</i></sub>|</span>, construct a column-sparse projection vector <span class="math-inline"><i>u</i><sub><i>l</i></sub> ∈ ℝ<sup><i>d</i><sub>ff</sub></sup></span> that retains these signed alignment values for <span class="math-inline"><i>j</i> ∈ <i>T</i><sub><i>l</i></sub></span> (and 0 otherwise), and normalize it to unit Euclidean norm:</li>
 </ol>
+
 <div class="math-display">
   <i>u</i><sub><i>l</i>, <i>j</i></sub> = 
   <span class="math-cases">
@@ -302,14 +306,15 @@
     <span class="denominator">&Vert;<i>u</i><sub><i>l</i></sub>&Vert;<sub>2</sub></span>
   </span>
 </div>
-   The surgical update is then:
+<p>The surgical update is then:</p>
+
 <div class="math-display">
   &Delta;<i>W</i><sub>down</sub><sup>(<i>l</i>)</sup> = &alpha; &middot; <i>d</i><sub><i>l</i></sub> &otimes; <i>u</i><sub><i>l</i></sub><sup><i>T</i></sup> = &alpha; &middot; <i>d</i><sub><i>l</i></sub> <i>u</i><sub><i>l</i></sub><sup><i>T</i></sup> &isin; &#8477;<sup><i>d</i> &times; <i>d</i><sub>ff</sub></sup>
 </div>
-   where <span class="math-inline">&alpha; = 0.6</span>. This intervention modifies exactly **86,016 parameters** (0.0174% of the entire model) across the 48 selected neuron columns per layer, with exact Frobenius norm <span class="math-inline">&Vert;&Delta;<i>W</i><sub>down</sub><sup>(<i>l</i>)</sup>&Vert;<sub>F</sub> = &alpha;&Vert;<i>d</i><sub><i>l</i></sub>&Vert;<sub>2</sub>&Vert;<i>u</i><sub><i>l</i></sub>&Vert;<sub>2</sub> = 0.600</span>.
-4. **M3 (Random Weight Control - Matched Sparsity & Rank-1, 3 Seeds):** To isolate semantic directionality from raw parameter perturbation, we generate a random Gaussian direction <span class="math-inline"><i>d</i><sub>rand</sub> &sim; <i>N</i>(0, <i>I</i><sub><i>d</i></sub>)</span>, project it through the exact same 48-column sparsity mask <span class="math-inline"><i>u</i><sub>rand</sub> &isin; &#8477;<sup><i>d</i><sub>ff</sub></sup></span>, and scale it to the exact same Frobenius norm (<span class="math-inline">0.600</span>). We evaluate across three independent seeds (`[42, 43, 44]`) and report mean <span class="math-inline">&plusmn;</span> standard deviation.
-5. **M4 (WSP + Prompt Combined):** Evaluates whether weight-space surgery synergizes with or degrades inference-time system instructions.
-6. **M5 (Inference-Time Activation Steering):** Control implementing dynamic residual addition during forward passes (<span class="math-inline"><i>h</i><sub><i>l</i></sub> &larr; <i>h</i><sub><i>l</i></sub> + &beta;<i>d</i><sub><i>l</i></sub></span>) without modifying model weights. The steering coefficient <span class="math-inline">&beta; = 2.0</span> was calibrated strictly on the calibration dev set (testing <span class="math-inline">&beta; &isin; [0.5, 1.0, 2.0]</span>).
+<p>where <span class="math-inline">α = 0.6</span>. This intervention modifies exactly <strong>86,016 parameters</strong> (0.0174% of the entire model) across the 48 selected neuron columns per layer, with exact Frobenius norm <span class="math-inline">‖Δ<i>W</i><sub>down</sub><sup>(<i>l</i>)</sup>‖<sub>F</sub> = α‖<i>d</i><sub><i>l</i></sub>‖<sub>2</sub>‖<i>u</i><sub><i>l</i></sub>‖<sub>2</sub> = 0.600</span>.
+4. <strong>M3 (Random Weight Control - Matched Sparsity &amp; Rank-1, 3 Seeds):</strong> To isolate semantic directionality from raw parameter perturbation, we generate a random Gaussian direction <span class="math-inline"><i>d</i><sub>rand</sub> ∼ <i>N</i>(0, <i>I</i><sub><i>d</i></sub>)</span>, project it through the exact same 48-column sparsity mask <span class="math-inline"><i>u</i><sub>rand</sub> ∈ ℝ<sup><i>d</i><sub>ff</sub></sup></span>, and scale it to the exact same Frobenius norm (<span class="math-inline">0.600</span>). We evaluate across three independent seeds (<code>[42, 43, 44]</code>) and report mean <span class="math-inline">±</span> standard deviation.
+5. <strong>M4 (WSP + Prompt Combined):</strong> Evaluates whether weight-space surgery synergizes with or degrades inference-time system instructions.
+6. <strong>M5 (Inference-Time Activation Steering):</strong> Control implementing dynamic residual addition during forward passes (<span class="math-inline"><i>h</i><sub><i>l</i></sub> ← <i>h</i><sub><i>l</i></sub> + β<i>d</i><sub><i>l</i></sub></span>) without modifying model weights. The steering coefficient <span class="math-inline">β = 2.0</span> was calibrated strictly on the calibration dev set (testing <span class="math-inline">β ∈ [0.5, 1.0, 2.0]</span>).</p>
 <hr />
 <h2>4. Empirical Results &amp; Findings</h2>
 <p>All evaluations used greedy decoding (temperature <span class="math-inline">= 0.0</span>, <code>max_new_tokens=80</code>, deterministic execution).</p>
