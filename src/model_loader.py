@@ -85,3 +85,4 @@ def generate_response(
     generated_tokens = output_ids[0][prompt_len:]
     response = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
     return response
+

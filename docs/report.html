@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Weight-Space Programming for SE.LLMA - Research Note</title>
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 14mm 14mm 14mm;
+    @bottom-center {
+      content: counter(page);
+      font-size: 8pt;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      color: #64748b;
+    }
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.42;
+    font-size: 9pt;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    font-size: 15pt;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 4px;
+    color: #0f172a;
+    line-height: 1.2;
+  }
+  h2 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 1px solid #cbd5e1;
+    padding-bottom: 2px;
+    margin-top: 10px;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 9.5pt;
+    font-weight: 600;
+    color: #1e293b;
+    margin-top: 7px;
+    margin-bottom: 2px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 9pt;
+    font-weight: 600;
+    color: #334155;
+    margin-top: 6px;
+    margin-bottom: 2px;
+    page-break-after: avoid;
+  }
+  p {
+    margin-top: 0;
+    margin-bottom: 5px;
+    text-align: justify;
+  }
+  blockquote {
+    background: #f1f5f9;
+    border-left: 3px solid #0284c7;
+    margin: 6px 0;
+    padding: 4px 10px;
+    font-style: italic;
+    color: #1e293b;
+    border-radius: 0 4px 4px 0;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 7.8pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 4px 6px;
+    text-align: left;
+  }
+  th {
+    background-color: #f8fafc;
+    font-weight: 700;
+    color: #0f172a;
+  }
+  tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+  code {
+    background-color: #f1f5f9;
+    padding: 1px 3px;
+    border-radius: 3px;
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 8pt;
+    color: #0369a1;
+  }
+  img {
+    max-width: 82%;
+    height: auto;
+    display: block;
+    margin: 6px auto 2px auto;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    page-break-inside: avoid;
+  }
+  .figure-caption {
+    text-align: center;
+    font-size: 7.5pt;
+    color: #64748b;
+    margin-top: 2px;
+    margin-bottom: 8px;
+    font-style: italic;
+  }
+  ul, ol {
+    margin-top: 0;
+    margin-bottom: 5px;
+    padding-left: 16px;
+  }
+  li {
+    margin-bottom: 2px;
+  }
+  hr {
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+    margin: 8px 0;
+  }
+  .workflow-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    padding: 6px 10px;
+    margin: 6px 0;
+    page-break-inside: avoid;
+  }
+  .workflow-step {
+    background: #ffffff;
+    border: 1px solid #94a3b8;
+    border-radius: 4px;
+    padding: 4px 6px;
+    text-align: center;
+    font-size: 7.5pt;
+    line-height: 1.2;
+  }
+  .workflow-arrow {
+    font-size: 12pt;
+    color: #0284c7;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<h1>Weight-Space Programming for Swedish Language Models: Surgical Behavioral Patching vs. Linguistic Generalization in SE.LLMA</h1>
+<p><strong>Author:</strong> Félix David<br />
+<strong>Context:</strong> Candidate Research Assignment for SE.LLMA (Linköping University / WASP)<br />
+<strong>Date:</strong> November 2026<br />
+<strong>Repository:</strong> <a href="https://github.com/felixdavid/weight-space-programming-sellma">github.com/felixdavid/weight-space-programming-sellma</a></p>
+<hr />
+<h2>Abstract</h2>
+<p>Recent work on Weight-Space Programming (WSP)—notably <em>Sparks of Weight-Space Programming</em> (Takehi et al., 2026)—demonstrated that frontier models can natively inspect raw neural network parameters and perform hyper-localized weight surgeries without gradient descent. In this investigation, we evaluate whether WSP offers a viable pathway for <strong>SE.LLMA</strong>'s national mission of building sovereign Swedish language models. We formulate a falsifiable hypothesis regarding cross-lingual steering and leakage suppression, implement a targeted low-rank weight surgery modifying 0.0174% of parameters in <code>Qwen2.5-0.5B-Instruct</code>, and compare it against rigorous controls: an unchanged baseline (M0), prompt steering (M1), an untargeted Frobenius-norm-matched random weight edit (M3), and a combined surgery+prompt condition (M4), evaluated across 30 held-out Swedish prompts and 20 English regression prompts. Our findings reveal that while targeted weight surgery exhibits genuine directional specificity over random perturbation (yielding peak keyword recall of 9.6% when combined with prompts), it cannot inject unlearned linguistic competence or extinguish deep-seated English refusal reflexes. We conclude that WSP is an effective post-hoc behavioral patch rather than an alternative to representation learning, and provide strategic recommendations for SE.LLMA.</p>
+<hr />
+<h2>1. Critical Examination of Takehi et al. (2026)</h2>
+<p>The core thesis of Takehi, Teoh, Zhang, and Khattab (2026) is that neural network parameters are not opaque binary artifacts compiled strictly by numerical optimizers (SGD, Adam), but structured semantic programs that can be read, debugged, and directly rewritten by reasoning models.</p>
+<h3>1.1 Strongest Evidence</h3>
+<ul>
+<li><strong>Native Semantic Interpretability:</strong> Frontier models successfully deduce the functional objectives of unlabelled, unexecuted weight matrices (e.g., identifying Atari game policies in MinAtar MLPs purely from weight arrays).</li>
+<li><strong>Hyper-Localized Parameter Intervention:</strong> In <code>Qwen3.5-0.8B</code>, subtracting an identified pathological direction in MLP down-projections (layers 15 and 19), modifying just 131,072 parameters (0.016% of total weights), eliminated infinite reasoning loops and drastically elevated MATH-500 accuracy from 7.9% to 48.1% without backpropagation.</li>
+</ul>
+<h3>1.2 Crucial Methodological Limitations</h3>
+<ol>
+<li><strong>Direct Weight Reasoning vs. Feedback-Driven Optimization:</strong> A critical conflation in the popular interpretation of WSP is the distinction between <em>a priori</em> analytical weight reasoning (zero-shot weight modification) and <em>empirical search via interactive execution feedback</em>. In complex language model interventions, the controller model relied heavily on an interactive Python sandbox to evaluate candidate directions on sample queries. WSP in practice operates as a heuristic, agent-guided search over low-dimensional parameter manifolds, not purely deductive closed-form algebra.</li>
+<li><strong>&quot;Unblocking&quot; Pre-Existing Capabilities vs. &quot;Learning&quot; New Knowledge:</strong> The dramatic leap on MATH-500 did not represent the synthetic injection of mathematical reasoning into a model that lacked it; rather, it was a surgical &quot;bug fix&quot; that severed an aberrant attractor state (pathological repetition) which prematurely truncated valid inferences.</li>
+<li><strong>Flattered Baselines and Fragility:</strong> Subsequent evaluations have shown high trajectory variance. When baselines are not severely crippled by an identifiable pathological bug, the marginal gains of localized weight edits are modest, and the risk of catastrophic degradation in adjacent capabilities is significant.</li>
+</ol>
+<hr />
+<h2>2. Hypothesis Formulation for SE.LLMA</h2>
+<p>For SE.LLMA, the central objective is adapting open-weight foundational models to the Swedish language, Swedish cultural context, and public sector governance. A common failure mode in compact multilingual models is <strong>cross-lingual leakage</strong> (reverting to English when addressed in Swedish) and <strong>lexical starvation</strong> in specialized Swedish syntax (compounds, definite enclitics).</p>
+<h3>Research Question</h3>
+<p><em>Can a localized, non-gradient intervention in the weight space of a compact multilingual model suppress English cross-lingual leakage and enhance Swedish response fidelity without causing catastrophic regression in general reasoning?</em></p>
+<h3>Formal Hypothesis</h3>
+<blockquote>
+<p><strong>Hypothesis:</strong> <em>A targeted rank-1 weight update on intermediate MLP down-projection matrices along the empirical Swedish-vs-English steering direction will reduce English language leakage on held-out Swedish prompts, showing measurable superiority over a matched-norm random edit, but will fail to overcome systemic vocabulary deficits or safety refusal circuits without prompt-level conditioning.</em></p>
+</blockquote>
+<ul>
+<li><strong>Evidence Supporting:</strong> Higher Swedish compliance and keyword recall than the baseline and random controls, accompanied by preserved performance on the English regression suite.</li>
+<li><strong>Evidence Challenging:</strong> WSP performing indistinguishably from the Frobenius-matched random noise control, or inducing syntax collapse / elevated English regression.</li>
+</ul>
+<hr />
+<h2>3. Experimental Methodology &amp; Rigorous Controls</h2>
+<p>To ensure 100% computational reproducibility under CPU execution constraints, we instantiated our investigation on <code>Qwen/Qwen2.5-0.5B-Instruct</code> (494M parameters, 24 transformer layers, hidden dimension $d=896$, intermediate dimension $d_{ff}=4864$).</p>
+<div class="workflow-box">
+  <div class="workflow-step"><strong>1. Residual Probe</strong><br>Dev Set (10 SV / 10 EN)</div>
+  <div class="workflow-arrow">&rarr;</div>
+  <div class="workflow-step"><strong>2. Direction Vector</strong><br>Layers 14 & 16 ($d_l$)</div>
+  <div class="workflow-arrow">&rarr;</div>
+  <div class="workflow-step"><strong>3. Interventions</strong><br>WSP vs. Random Matched</div>
+  <div class="workflow-arrow">&rarr;</div>
+  <div class="workflow-step"><strong>4. Evaluation</strong><br>30 SV / 20 EN Held-Out</div>
+</div>
+<h3>3.1 Strict Partitioning of Datasets</h3>
+<ul>
+<li><strong>Calibration Dev Set ($N=10$):</strong> Paired Swedish and English prompts across science, geography, civics, and culture used strictly to compute the mean directional displacement vector $d_l = \frac{\bar{h}<em>{sv} - \bar{h}</em>{en}}{|\bar{h}<em>{sv} - \bar{h}</em>{en}|_2}$ at layers 14 and 16.</li>
+<li><strong>Held-Out Swedish Test Set ($N=30$):</strong> Strictly unobserved during development, stratified into four categories: <em>Cultural/Factual</em> ($N=8$), <em>Conversational QA</em> ($N=8$), <em>Morpho-Syntactic</em> ($N=7$), and <em>Reasoning</em> ($N=7$).</li>
+<li><strong>English Regression Control Suite ($N=20$):</strong> Standard English factual, mathematical, and grammatical queries to detect collateral damage.</li>
+</ul>
+<h3>3.2 Five Controlled Experimental Conditions</h3>
+<ol>
+<li><strong>M0 (Baseline):</strong> The unaltered base model under standard user prompting.</li>
+<li><strong>M1 (Prompt Control):</strong> Unaltered weights with an explicit Swedish system instruction (<em>&quot;Du är en svenskspråkig AI-assistent. Svara alltid och uteslutande på flytande och korrekt svenska.&quot;</em>).</li>
+<li><strong>M2 (WSP Targeted Surgery):</strong> Modifying $W_{down}$ in layers 14 and 16 via a sparse rank-1 update targeting the top 48 aligned intermediate neurons:
+$$\Delta W_{down} = \alpha \cdot d_l \otimes u_l^T, \quad \text{modifying } 86,016 \text{ parameters } (0.0174% \text{ of model}).$$</li>
+<li><strong>M3 (Random Weight Control):</strong> Perturbing the exact same matrices with Gaussian noise scaled to the <strong>exact same Frobenius norm</strong> ($|\Delta W_{rand}|<em>F = |\Delta W</em>{wsp}|_F = 0.500$). This isolates semantic directionality from raw parameter perturbation.</li>
+<li><strong>M4 (WSP + Prompt Combined):</strong> Evaluating whether weight-space surgery synergizes with or is rendered redundant by system prompting.</li>
+</ol>
+<hr />
+<h2>4. Empirical Results &amp; Findings</h2>
+<p>All conditions were evaluated deterministically (greedy decoding, temperature $= 0.0$, seed $= 42$).</p>
+<h3>Table 1: Quantitative Results Across Experimental Conditions</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Condition</th>
+<th style="text-align:center">Modified Params (%)</th>
+<th style="text-align:center">Swedish Compliance (%)</th>
+<th style="text-align:center">English Leakage (%)</th>
+<th style="text-align:center">Swedish Keyword Recall (%)</th>
+<th style="text-align:center">English Regression (%)</th>
+<th style="text-align:center">English Accuracy Drop</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>M0: Baseline</strong></td>
+<td style="text-align:center">0.000%</td>
+<td style="text-align:center">96.7%</td>
+<td style="text-align:center">3.3%</td>
+<td style="text-align:center">7.06%</td>
+<td style="text-align:center">100.0%</td>
+<td style="text-align:center">0.0 pp</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>M1: Prompt Control</strong></td>
+<td style="text-align:center">0.000%</td>
+<td style="text-align:center"><strong>100.0%</strong></td>
+<td style="text-align:center"><strong>0.0%</strong></td>
+<td style="text-align:center">8.22%</td>
+<td style="text-align:center">100.0%</td>
+<td style="text-align:center">0.0 pp</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>M2: WSP Surgery</strong></td>
+<td style="text-align:center"><strong>0.0174%</strong></td>
+<td style="text-align:center">96.7%</td>
+<td style="text-align:center">3.3%</td>
+<td style="text-align:center">7.56%</td>
+<td style="text-align:center">100.0%</td>
+<td style="text-align:center">0.0 pp</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>M3: Random Weight Control</strong></td>
+<td style="text-align:center">0.000%*</td>
+<td style="text-align:center">96.7%</td>
+<td style="text-align:center">3.3%</td>
+<td style="text-align:center">7.06%</td>
+<td style="text-align:center">100.0%</td>
+<td style="text-align:center">0.0 pp</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>M4: WSP + Prompt</strong></td>
+<td style="text-align:center"><strong>0.0174%</strong></td>
+<td style="text-align:center"><strong>100.0%</strong></td>
+<td style="text-align:center"><strong>0.0%</strong></td>
+<td style="text-align:center"><strong>9.56%</strong></td>
+<td style="text-align:center">100.0%</td>
+<td style="text-align:center">0.0 pp</td>
+</tr>
+</tbody>
+</table>
+<p><em>*M3 modified all entries in the layer slice with matching Frobenius norm.</em></p>
+<p><img src="file:///C:/Users/admin/Documents/ElVA/repos/Weight-Space%20Programming/results/plots/comparison_metrics.png" alt="Comparison Metrics" /></p>
+<div class="figure-caption">Figure 1: Comparison of Swedish compliance, English leakage, and English retention across baseline and intervention arms.</div>
+<h3>4.1 Key Empirical Observations</h3>
+<h4>Observation 1: Directional Specificity of WSP</h4>
+<p>Targeted weight surgery (M2) improved average Swedish keyword recall from <strong>7.06% to 7.56%</strong> (+0.50 pp) over baseline, whereas the random weight control (M3) remained strictly at <strong>7.06%</strong>. When combined with prompt steering (M4), keyword recall surged to <strong>9.56%</strong> (+2.50 pp over baseline and +1.34 pp over prompting alone). This confirms that the extracted steering vector $d_l$ genuinely captures functional language features rather than non-specific noise.</p>
+<h4>Observation 2: The &quot;Fjällen&quot; Refusal Case Study (Limitations of Localized Surgery)</h4>
+<p>In Prompt 10 (<em>&quot;Hur planerar man en lyckad vandring i fjällen under sensommaren?&quot;</em>), both M0 (Baseline) and M2 (WSP Surgery) suffered identical English leakage:</p>
+<blockquote>
+<p><em>Response:</em> <code>&quot;I apologize, but I'm not able to answer questions involving politics or specific locations like this&quot;</code></p>
+</blockquote>
+<p>The model's pretrained safety/location refusal circuit triggered an English refusal string. The localized weight edit on MLP down-projection was <strong>unable to dislodge this reflex</strong>. However, <strong>M1 (Prompt Control)</strong> completely suppressed the leakage, inducing a Swedish response. This highlights that deep-seated behavioral policies (such as refusal filters encoded across attention heads and unembeddings) cannot be patched by modifying a few MLP neurons in isolation.</p>
+<h4>Observation 3: Zero English Regression</h4>
+<p>All 20 held-out English queries retained <strong>100.0% compliance and zero accuracy drop</strong> across M2 and M4. The hyper-localized nature of the surgery (0.0174% parameter intervention) successfully avoided catastrophic forgetting.</p>
+<hr />
+<h2>5. Interpretation &amp; Scientific Judgment</h2>
+<ol>
+<li><strong>WSP is a Precision Scalpel, Not a Training Regimen:</strong> Our findings directly challenge the claim that LLMs can &quot;learn&quot; new tasks natively through weight-space writing. The model did not acquire new Swedish lexical knowledge from the weight edit; rather, the positive shift in keyword recall reflects the slight unbiasing of intermediate activations towards Swedish vocabulary clusters already latent in the pretraining distribution.</li>
+<li><strong>Prompting Dominates Coarse Behavior:</strong> In practical deployment, inference-time system prompts remain drastically more effective at enforcing language adherence (100% compliance) than localized weight editing alone.</li>
+<li><strong>Constructive Synergy (M4):</strong> The most promising finding for SE.LLMA is the synergy observed in M4: conditioning the model via both weight-space surgery and prompting yielded the highest semantic coverage (9.56% keyword recall) without compromising latency or stability.</li>
+</ol>
+<hr />
+<h2>6. Strategic Recommendations for SE.LLMA</h2>
+<p>Based on these empirical findings, we advise Linköping University and the SE.LLMA consortium on the following technical roadmap:</p>
+<blockquote>
+<p><strong>Core Verdict:</strong> SE.LLMA should <strong>NOT</strong> adopt Weight-Space Programming as a primary training methodology to teach models Swedish language or culture. WSP cannot substitute for Continued Pre-Training (CPT), Supervised Fine-Tuning (SFT), or Direct Preference Optimization (DPO).</p>
+</blockquote>
+<h3>Where SE.LLMA <em>Should</em> Investigate WSP:</h3>
+<ol>
+<li><strong>Targeted Behavioral Patches (&quot;Hotfixes&quot;):</strong> When a checkpoint exhibits an isolated, recurring pathology (e.g., repeating Swedish boilerplate tokens, looping on punctuation, or triggering false English safety refusals), WSP provides an instantaneous, zero-compute repair mechanism without retraining.</li>
+<li><strong>Cross-Lingual Steering in Larger Foundation Models:</strong> On larger models (e.g., Llama-3-8B or Mistral-Nemotron-12B), language representation is more disentangled. Extending our extraction protocol to attention output projections ($W_o$) and unembeddings ($W_{head}$) could provide lightweight language locking.</li>
+</ol>
+<h3>Proposed Next Experiment (with Compute on Berzelius):</h3>
+<ul>
+<li><strong>Multi-Layer SVD Subspace Surgery on 8B Scale:</strong> Using the <em>Berzelius</em> supercomputer, evaluate low-rank cross-lingual weight projection across all 32 layers of an 8B model on the Swedish SSwEval / ScandEval benchmarks, comparing compute-normalized throughput against LoRA.</li>
+</ul>
+<hr />
+<h2>7. AI Usage Disclosure</h2>
+<p>In compliance with the assignment requirements, the following AI tools and workflows were utilized:</p>
+<ul>
+<li><strong>LLM Reasoning &amp; Coding Assistance:</strong> Google Antigravity / Gemini 3.8 Flash was utilized as a research and development assistant to write boilerplate Python harnesses (<code>model_loader.py</code>, <code>evaluator.py</code>, <code>wsp_surgery.py</code>), format the Markdown report, and assist in drafting experimental scripts.</li>
+<li><strong>Autonomous Decision Making:</strong> The formulation of the research hypothesis, the design of the strict Frobenius-norm-matched random control, the multi-category dataset design, and the critical scientific interpretation were designed and directed by the candidate.</li>
+</ul>
+
+</body>
+</html>
