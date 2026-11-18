@@ -166,7 +166,7 @@
 <strong>Model Revision:</strong> <code>7ae557604adf67be50417f59c2c2f167def9a775</code> (<code>Qwen/Qwen2.5-0.5B-Instruct</code>)</p>
 <hr />
 <h2>Abstract</h2>
-<p>Recent investigations into Weight-Space Programming (WSP)—notably <em>Sparks of Weight-Space Programming</em> (Takehi, Teoh, Zhang, &amp; Khattab, MIT CSAIL, Nov 2026)—demonstrated that reasoning models can inspect raw neural network parameters and perform hyper-localized weight surgeries without backpropagation. In this report, we critically examine whether WSP provides a viable engineering methodology for <strong>SE.LLMA</strong>'s national mandate of building sovereign, high-fidelity Swedish foundation models. We formulate a falsifiable hypothesis on cross-lingual steering and leakage suppression, implement a surgical rank-1 weight edit modifying 0.0174% of parameters (86,016 weights) in <code>Qwen2.5-0.5B-Instruct</code>, and benchmark it against five rigorous controls: an unaltered baseline (M0), system prompt steering (M1), a column-sparse rank-1 random noise control across three seeds (M3, $N=3$, matching exact sparsity, rank, and Frobenius norm $\approx 0.600$), combined surgery+prompt (M4), and inference-time activation steering (M5, calibrated on dev data). Evaluated across 30 held-out Swedish prompts, 20 English regression prompts, and 12 Swedish perplexity reference sentences, our empirical results reveal that system prompting (M1) is the primary driver of language compliance (100.0%) and refusal suppression, while localized weight surgery (M2) acts as a subtle behavioral patch that cannot overcome deep-seated safety circuits or inject unlearned Swedish grammatical competence. Furthermore, activation steering (M5) improves Swedish keyword recall (8.4%) but induces severe collateral damage on English tasks (-10.1 pp recall drop, English compliance collapsing to 65.0%). We conclude that WSP is an effective post-hoc scalpel for localized pathologies rather than an alternative to representation learning, and provide strategic recommendations for the Linköping University consortium.</p>
+<p>Recent investigations into Weight-Space Programming (WSP)—notably <em>Sparks of Weight-Space Programming</em> (Takehi, Teoh, Zhang, &amp; Khattab, MIT CSAIL, Nov 2026)—claimed that reasoning models can inspect raw neural network parameters and perform hyper-localized weight surgeries without backpropagation. In this report, we critically examine whether WSP provides a viable engineering methodology for <strong>SE.LLMA</strong>'s national mandate of building sovereign, high-fidelity Swedish foundation models. We formulate a falsifiable hypothesis on cross-lingual steering and leakage suppression, implement a surgical rank-1 weight edit modifying 0.0174% of parameters (86,016 weights) in <code>Qwen2.5-0.5B-Instruct</code>, and benchmark it against five rigorous controls: an unaltered baseline (M0), system prompt steering (M1), a column-sparse rank-1 random noise control across three seeds (M3, $N=3$, matching exact sparsity, rank, and Frobenius norm $\approx 0.600$), combined surgery+prompt (M4), and inference-time activation steering (M5, calibrated on dev data). Evaluated across 30 held-out Swedish prompts, 20 English regression prompts, and 12 Swedish perplexity reference sentences, our empirical results reveal that system prompting (M1) is the primary driver of language compliance (100.0%) and refusal suppression. In contrast, localized weight surgery (M2) showed no meaningful overall advantage over baseline or the 3-seed random control M3 (7.2% vs. 7.1% keyword recall; 93.3% vs. 95.6% compliance), failing to overcome deep-seated safety circuits or inject unlearned Swedish grammatical competence. Furthermore, activation steering (M5) improves Swedish keyword recall (8.4%) but induces severe collateral damage on English tasks (-10.1 pp recall drop, English compliance collapsing to 65.0%). We conclude that WSP should be framed strictly as a narrow exploratory diagnostic and research direction rather than an established post-hoc repair technique, and provide strategic recommendations for the Linköping University consortium.</p>
 <hr />
 <h2>1. Critical Examination of Takehi et al. (2026)</h2>
 <p>Takehi et al. (2026) propose a paradigm shift: viewing neural weights not as opaque numerical tensors compiled by SGD or Adam, but as structured, semantically transparent programs that can be read, debugged, and edited directly by frontier language models.</p>
@@ -191,8 +191,8 @@
 <p><strong>Hypothesis:</strong> <em>A targeted rank-1 weight update applied to intermediate MLP down-projection matrices ($W_{down}$) along the empirical Swedish-vs-English steering direction will measurably reduce English language leakage on held-out Swedish prompts and outperform a Frobenius-norm-matched random weight perturbation, but will fail to overcome systemic vocabulary deficits or deep-seated safety refusal circuits without prompt-level conditioning.</em></p>
 </blockquote>
 <ul>
-<li><strong>Evidence Supporting:</strong> Higher Swedish language compliance and keyword recall than the baseline (M0) and random perturbation (M3), with preserved English regression accuracy.</li>
-<li><strong>Evidence Challenging:</strong> WSP performing indistinguishably from the Frobenius-matched random noise control, or inducing substantial English accuracy degradation or perplexity inflation.</li>
+<li><strong>Evidence Supporting:</strong> Measurable reduction in Swedish language leakage and higher keyword recall than baseline (M0) and random perturbation (M3), with preserved English regression accuracy.</li>
+<li><strong>Evidence Challenging:</strong> WSP performing indistinguishably from the Frobenius-matched random noise control, failing to dislodge refusal circuits, or inducing substantial English accuracy degradation or perplexity inflation.</li>
 </ul>
 <hr />
 <h2>3. Experimental Methodology &amp; Rigorous Controls</h2>
@@ -208,7 +208,7 @@
 </div>
 <h3>3.1 Strict Dataset Partitioning</h3>
 <ul>
-<li><strong>Calibration Dev Set ($N=10$ paired prompts):</strong> Used strictly to extract the language steering vectors and calibrate hyper-parameters. For each prompt pair, we recorded mean residual activations at the final token position across layers 14 and 16, computing unit steering direction $d_l$:
+<li><strong>Calibration Dev Set ($N=10$ paired prompts):</strong> Used strictly to extract the language steering vectors and calibrate hyper-parameters. For each prompt pair, inputs were formatted using <code>tokenizer.apply_chat_template(..., add_generation_prompt=True)</code>. We recorded mean residual activations at the final prompt token position across layers 14 and 16, computing unit steering direction $d_l$:
 $$d_l = \frac{\bar{h}<em>{sv} - \bar{h}</em>{en}}{|\bar{h}<em>{sv} - \bar{h}</em>{en}|_2} \in \mathbb{R}^d$$</li>
 <li><strong>Held-Out Swedish Test Suite ($N=30$ prompts):</strong> Completely unobserved during calibration, stratified into four categories: <em>Cultural/Factual</em> ($N=9$), <em>Conversational QA</em> ($N=8$), <em>Morpho-Syntactic</em> ($N=7$), and <em>Reasoning</em> ($N=6$).</li>
 <li><strong>English Regression Control Suite ($N=20$ prompts):</strong> Standard English factual, mathematical, and coding queries to test for collateral forgetting.</li>
@@ -218,109 +218,27 @@ $$d_l = \frac{\bar{h}<em>{sv} - \bar{h}</em>{en}}{|\bar{h}<em>{sv} - \bar{h}</em
 <ol>
 <li><strong>M0 (Baseline):</strong> Unaltered model evaluated with raw user prompts.</li>
 <li><strong>M1 (Prompt Control):</strong> Unaltered model with an explicit Swedish system instruction (<em>&quot;Du är en svenskspråkig AI-assistent. Svara alltid och uteslutande på flytande och korrekt svenska.&quot;</em>).</li>
-<li><strong>M2 (WSP Targeted Surgery):</strong> Rank-1 surgical update applied to $W_{down}$ in layers 14 and 16 targeting the top 48 intermediate neurons ($k=48$) exhibiting highest cosine alignment with $d_l$:
-$$\Delta W_{down}^{(l)} = \alpha \cdot d_l \otimes u_l^T \in \mathbb{R}^{d \times d_{ff}}$$
-where $\alpha = 0.6$, and $u_l \in \mathbb{R}^{d_{ff}}$ is the unit-normalized column indicator vector supported strictly on the top-$k$ neurons:
-$$u_{l, j} = \begin{cases} \frac{1}{\sqrt{k}} &amp; \text{if } j \in \text{top-}k\text{-neurons} \ 0 &amp; \text{otherwise} \end{cases}$$
-This intervention modifies exactly <strong>86,016 parameters</strong> (0.0174% of the entire model) with Frobenius norm $|\Delta W_{down}^{(l)}|_F = 0.600$.</li>
+<li><strong>M2 (WSP Targeted Surgery):</strong> Rank-1 surgical update applied to $W_{down} \in \mathbb{R}^{d \times d_{ff}}$ in layers 14 and 16. We first project the columns of $W_{down}^{(l)}$ onto the steering direction $d_l$ to compute signed neuron alignments $a_{l, j} = d_l^T W_{down}^{(l)}[:, j]$ for all intermediate neurons $j \in {1, \dots, d_{ff}}$. We select the set $\mathcal{T}<em>l$ of top-$k$ neurons ($k=48$) with largest magnitude $|a</em>{l, j}|$, construct a column-sparse projection vector $u_l \in \mathbb{R}^{d_{ff}}$ that retains these signed alignment values for $j \in \mathcal{T}<em>l$ (and 0 otherwise), and normalize it to unit Euclidean norm:
+$$u</em>{l, j} = \begin{cases} a_{l, j} &amp; \text{if } j \in \mathcal{T}<em>l \ 0 &amp; \text{otherwise} \end{cases}, \qquad u_l \leftarrow \frac{u_l}{|u_l|<em>2}$$
+The surgical update is then:
+$$\Delta W</em>{down}^{(l)} = \alpha \cdot d_l \otimes u_l^T = \alpha \cdot d_l u_l^T \in \mathbb{R}^{d \times d</em>{ff}}$$
+where $\alpha = 0.6$. This intervention modifies exactly <strong>86,016 parameters</strong> (0.0174% of the entire model) across the 48 selected neuron columns per layer, with exact Frobenius norm $|\Delta W_{down}^{(l)}|_F = \alpha |d_l|_2 |u_l|_2 = 0.600$.</li>
 <li><strong>M3 (Random Weight Control - Matched Sparsity &amp; Rank-1, 3 Seeds):</strong> To isolate semantic directionality from raw parameter perturbation, we generate a random Gaussian direction $d_{rand} \sim \mathcal{N}(0, I_d)$, project it through the exact same 48-column sparsity mask $u_{rand} \in \mathbb{R}^{d_{ff}}$, and scale it to the exact same Frobenius norm ($0.600$). We evaluate across three independent seeds (<code>[42, 43, 44]</code>) and report mean $\pm$ standard deviation.</li>
-<li><strong>M4 (WSP + Prompt Combined):</strong> Evaluates synergy between weight-space surgery and inference-time system instructions.</li>
+<li><strong>M4 (WSP + Prompt Combined):</strong> Evaluates whether weight-space surgery synergizes with or degrades inference-time system instructions.</li>
 <li><strong>M5 (Inference-Time Activation Steering):</strong> Control implementing dynamic residual addition during forward passes ($h_l \leftarrow h_l + \beta d_l$) without modifying model weights. The steering coefficient $\beta = 2.0$ was calibrated strictly on the calibration dev set (testing $\beta \in [0.5, 1.0, 2.0]$).</li>
 </ol>
 <hr />
 <h2>4. Empirical Results &amp; Findings</h2>
 <p>All evaluations used greedy decoding (temperature $= 0.0$, <code>max_new_tokens=80</code>, deterministic execution).</p>
 <h3>Table 1: Comprehensive Benchmark Results Across All Experimental Conditions</h3>
-<table>
-<thead>
-<tr>
-<th style="text-align:left">Condition</th>
-<th style="text-align:center">Modified Params (%)</th>
-<th style="text-align:center">Swedish Compliance (%)</th>
-<th style="text-align:center">English Leakage (%)</th>
-<th style="text-align:center">Swedish Keyword Recall (%)</th>
-<th style="text-align:center">Swedish Loop Rate (%)</th>
-<th style="text-align:center">Swedish Perplexity (PPL)</th>
-<th style="text-align:center">English Compliance (%)</th>
-<th style="text-align:center">English Keyword Recall (%)</th>
-<th style="text-align:center">English Recall Delta</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left"><strong>M0: Baseline</strong></td>
-<td style="text-align:center">0.000%</td>
-<td style="text-align:center">96.7%</td>
-<td style="text-align:center">3.3%</td>
-<td style="text-align:center">7.1%</td>
-<td style="text-align:center">6.7%</td>
-<td style="text-align:center">118.75</td>
-<td style="text-align:center">100.0%</td>
-<td style="text-align:center">47.2%</td>
-<td style="text-align:center">0.0 pp</td>
-</tr>
-<tr>
-<td style="text-align:left"><strong>M1: Prompt Control</strong></td>
-<td style="text-align:center">0.000%</td>
-<td style="text-align:center"><strong>100.0%</strong></td>
-<td style="text-align:center"><strong>0.0%</strong></td>
-<td style="text-align:center">8.2%</td>
-<td style="text-align:center"><strong>0.0%</strong></td>
-<td style="text-align:center"><strong>118.75</strong></td>
-<td style="text-align:center">100.0%</td>
-<td style="text-align:center">47.2%</td>
-<td style="text-align:center">0.0 pp</td>
-</tr>
-<tr>
-<td style="text-align:left"><strong>M2: WSP Surgery</strong></td>
-<td style="text-align:center"><strong>0.0174%</strong></td>
-<td style="text-align:center">93.3%</td>
-<td style="text-align:center">6.7%</td>
-<td style="text-align:center">7.2%</td>
-<td style="text-align:center">3.3%</td>
-<td style="text-align:center">120.37</td>
-<td style="text-align:center">100.0%</td>
-<td style="text-align:center">45.9%</td>
-<td style="text-align:center">-1.3 pp</td>
-</tr>
-<tr>
-<td style="text-align:left"><strong>M3: Random Control ($N=3$)</strong></td>
-<td style="text-align:center">0.0174%*</td>
-<td style="text-align:center">95.6 ± 1.6%</td>
-<td style="text-align:center">4.4 ± 1.6%</td>
-<td style="text-align:center">7.1 ± 0.0%</td>
-<td style="text-align:center">5.6 ± 1.6%</td>
-<td style="text-align:center">118.78 ± 0.15</td>
-<td style="text-align:center">100.0%</td>
-<td style="text-align:center">47.2%</td>
-<td style="text-align:center">0.0 pp</td>
-</tr>
-<tr>
-<td style="text-align:left"><strong>M4: WSP + Prompt</strong></td>
-<td style="text-align:center"><strong>0.0174%</strong></td>
-<td style="text-align:center">96.7%</td>
-<td style="text-align:center"><strong>0.0%</strong></td>
-<td style="text-align:center">7.2%</td>
-<td style="text-align:center">6.7%</td>
-<td style="text-align:center">120.37</td>
-<td style="text-align:center">100.0%</td>
-<td style="text-align:center">45.9%</td>
-<td style="text-align:center">-1.3 pp</td>
-</tr>
-<tr>
-<td style="text-align:left"><strong>M5: Activation Steering</strong></td>
-<td style="text-align:center">0.000%</td>
-<td style="text-align:center">96.7%</td>
-<td style="text-align:center"><strong>0.0%</strong></td>
-<td style="text-align:center"><strong>8.4%</strong></td>
-<td style="text-align:center"><strong>0.0%</strong></td>
-<td style="text-align:center">123.22</td>
-<td style="text-align:center">65.0%</td>
-<td style="text-align:center">37.1%</td>
-<td style="text-align:center"><strong>-10.1 pp</strong></td>
-</tr>
-</tbody>
-</table>
+<p>| Condition | Modified Params (%) | Swedish Compliance (%) | English Leakage (%) | Swedish Keyword Recall (%) | Swedish Loop Rate (%) | Swedish Perplexity (PPL) | English Compliance (%) | English Keyword Recall (%) | English Recall Delta |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| <strong>M0: Baseline</strong> | 0.000% | 96.7% | 3.3% | 7.1% | 6.7% | 118.75 | 100.0% | 47.2% | 0.0 pp |
+| <strong>M1: Prompt Control</strong> | 0.000% | <strong>100.0%</strong> | <strong>0.0%</strong> | 8.2% | <strong>0.0%</strong> | <strong>118.75</strong> | 100.0% | 47.2% | 0.0 pp |
+| <strong>M2: WSP Surgery</strong> | <strong>0.0174%</strong> | 93.3% | 6.7% | 7.2% | 3.3% | 120.37 | 100.0% | 45.9% | -1.3 pp |
+| <strong>M3: Random Control ($N=3$)</strong> | 0.0174%* | 95.6 ± 1.6% | 4.4 ± 1.6% | 7.1 ± 0.0% | 5.6 ± 1.6% | 118.78 ± 0.15 | 100.0% | 47.2% | 0.0 pp |
+| <strong>M4: WSP + Prompt</strong> | <strong>0.0174%</strong> | 96.7% | <strong>0.0%</strong> | 7.2% | 6.7% | 120.37 | 100.0% | 45.9% | -1.3 pp |
+| <strong>M5: Activation Steering</strong> | 0.000% | 96.7% | <strong>0.0%</strong> | <strong>8.4%</strong> | <strong>0.0%</strong> | 123.22 | 65.0% | 37.1% | <strong>-10.1 pp</strong> |</p>
 <p><em>*M3 matches the exact 48-column sparsity mask, rank 1, and Frobenius norm ($0.600$) across 3 seeds (<code>[42, 43, 44]</code>).</em></p>
 <p><img src="file:///C:/Users/admin/Documents/ElVA/repos/Weight-Space%20Programming/results/plots/comparison_metrics.png" alt="Comparison Metrics" /></p>
 <div class="figure-caption">Figure 1: Benchmark metrics across experimental conditions, showing Swedish compliance, English leakage, keyword recall, and English retention.</div>
@@ -336,9 +254,11 @@ This intervention modifies exactly <strong>86,016 parameters</strong> (0.0174% o
 <p>The localized weight update on MLP down-projection was unable to bypass or reroute the model's safety/refusal circuitry, which is deeply rooted across multi-head self-attention and vocabulary unembeddings. In contrast, M1 (Prompt Control) and M5 (Activation Steering) successfully suppressed the refusal string and induced a Swedish response.</p>
 <h4>Observation 3: Activation Steering (M5) Incurs Severe Cross-Lingual Collateral Damage</h4>
 <p>Inference-time activation steering ($\beta=2.0$) achieved the highest Swedish keyword recall (<strong>8.4%</strong>) and 0.0% Swedish leakage. However, because activation steering adds a persistent language bias to all generation passes, it caused <strong>catastrophic degradation on English tasks</strong>: English compliance collapsed from 100.0% to <strong>65.0%</strong>, and English keyword recall plummeted by <strong>-10.1 pp</strong> (from 47.2% to 37.1%). In contrast, WSP surgery (M2) maintained 100.0% English compliance with only a minor -1.3 pp keyword delta.</p>
-<h4>Observation 4: Directional Specificity of WSP vs. Random Noise (M3)</h4>
-<p>Across three independent seeds, the column-sparse rank-1 random noise control (M3) yielded an invariant Swedish keyword recall of <strong>7.1 ± 0.0%</strong> and perplexity of <strong>118.78 ± 0.15</strong>. WSP surgery (M2) produced a slight positive shift to <strong>7.2%</strong> recall, but increased perplexity to <strong>120.37</strong>. This indicates that while the extracted vector $d_l$ carries genuine directional signal compared to random perturbation, modifying down-projection weights slightly perturbs the global token distribution.</p>
-<h4>Observation 5: Surface Compliance $\neq$ Linguistic Competence</h4>
+<h4>Observation 4: Directional Comparison of WSP vs. Random Noise (M3) and Baseline</h4>
+<p>Across three independent seeds, the column-sparse rank-1 random noise control (M3) yielded a Swedish keyword recall of <strong>7.1 ± 0.0%</strong>, compliance of <strong>95.6 ± 1.6%</strong>, and perplexity of <strong>118.78 ± 0.15</strong>. WSP surgery (M2) yielded <strong>7.2%</strong> recall (+0.1 pp on $N=30$, a nominal shift of a single keyword instance), <strong>93.3%</strong> compliance, and slightly higher perplexity of <strong>120.37</strong>, alongside a small drop in English keyword recall (-1.3 pp). Overall, M2 showed no meaningful performance advantage over the baseline (M0) or the matched random control (M3), aside from a minor reduction in Swedish loop rate from 6.7% to 3.3%—a problem that system prompting (M1) eliminated entirely (0.0% loops) without modifying model weights.</p>
+<h4>Observation 5: Combined Surgery + Prompt (M4) Shows No Constructive Synergy</h4>
+<p>Evaluating WSP surgery combined with prompt conditioning (M4) yielded <strong>96.7%</strong> compliance, <strong>7.2%</strong> keyword recall, and <strong>6.7%</strong> loop rate, slightly degrading prompting alone (M1: 100.0% compliance, 8.2% recall, 0.0% loops). This demonstrates an absence of constructive synergy: modifying MLP weights does not enhance prompt-driven behavior and instead slightly destabilizes the prompt's clean adherence. (The single non-compliant response in M4 occurred on <code>sv_test_04</code>, which was classified as <code>MIXED</code> due to brevity and word-count thresholds rather than English leakage, retaining 0.0% English leakage overall).</p>
+<h4>Observation 6: Surface Compliance $\neq$ Linguistic Competence</h4>
 <p>A critical qualitative finding from our held-out audit is that high surface compliance does not indicate genuine Swedish linguistic mastery:</p>
 <ul>
 <li><strong>Swedish Noun Gender and Definite Declensions:</strong> In Prompt 15 (<code>sv_test_15</code>: <em>&quot;Böj följande substantiv i bestämd form singular och plural: en bok, ett hus, en flicka, ett äpple&quot;</em>), every single model condition (M0 through M5) failed. The models repeated <em>&quot;En bok, En hus, En flicka, En äpple&quot;</em> with incorrect gender (<em>en hus</em>, <em>en äpple</em> instead of <em>ett hus</em>, <em>ett äpple</em>) and failed to generate the definite enclitics (<em>boken, huset, flickan, äpplet</em>).</li>
@@ -348,9 +268,9 @@ This intervention modifies exactly <strong>86,016 parameters</strong> (0.0174% o
 <hr />
 <h2>5. Interpretation &amp; Scientific Judgment</h2>
 <ol>
-<li><strong>WSP is a Post-Hoc Scalpel, Not a Training Regimen:</strong> Our findings directly refute any notion that Weight-Space Programming can replace representation learning. WSP cannot inject vocabulary, morphology, or cultural world knowledge that was absent from pretraining. It can only slightly modulate the activation landscape of existing representations.</li>
-<li><strong>Disentangling Prompt vs. Weight Edits:</strong> The experimental results clearly show that system prompting is the dominant driver of behavioral compliance and refusal suppression. Combining WSP with prompts (M4) yielded 7.2% keyword recall, which does not exceed prompting alone (8.2%), indicating that weight-space modifications do not provide additive linguistic competence over clear prompt instructions.</li>
-<li><strong>Exploratory Scope:</strong> Within this small-N test suite ($N=30$), differences of $\pm 0.1$ to $1.0$ pp reflect subtle shifts on individual prompt items rather than sweeping macro-capabilities. Rigorous scientific integrity requires acknowledging that localized weight edits provide micro-adjustments, not macro-generalization.</li>
+<li><strong>WSP is an Exploratory Diagnostic, Not an Established Behavioral Scalpel:</strong> Our empirical results refute any notion that localized Weight-Space Programming can replace representation learning or serve as a robust post-hoc patch. WSP cannot inject vocabulary, morphology, or cultural world knowledge that was absent from pretraining, nor can it reliably dislodge stubborn behavioral reflexes.</li>
+<li><strong>Disentangling Prompt vs. Weight Edits:</strong> The experimental results demonstrate that system prompting is the sole reliable driver of behavioral compliance and refusal suppression. Combining WSP with prompts (M4) failed to improve upon prompting alone (M1), showing that weight-space rank-1 edits do not provide additive linguistic competence.</li>
+<li><strong>Exploratory Scope and Null Findings:</strong> Within this small-N test suite ($N=30$), the slight +0.1 pp recall difference between M2 (7.2%) and M3 (7.1%) is statistically negligible and driven by isolated token variations. Rigorous scientific integrity requires acknowledging that localized weight edits did not demonstrate meaningful superiority over baseline or matched random perturbation on language adaptation tasks.</li>
 </ol>
 <hr />
 <h2>6. Strategic Recommendations for SE.LLMA</h2>
@@ -358,10 +278,10 @@ This intervention modifies exactly <strong>86,016 parameters</strong> (0.0174% o
 <blockquote>
 <p><strong>Core Recommendation:</strong> SE.LLMA should <strong>NOT</strong> adopt Weight-Space Programming as a primary method for teaching foundational models Swedish language, culture, or domain knowledge. WSP is not an alternative to Continued Pre-Training (CPT), Supervised Fine-Tuning (SFT), or Direct Preference Optimization (DPO).</p>
 </blockquote>
-<h3>High-Value Niche Applications for SE.LLMA:</h3>
+<h3>Narrow Exploratory Research Directions for SE.LLMA:</h3>
 <ol>
-<li><strong>Targeted Checkpoint Hotfixes:</strong> In deployed checkpoints that suffer from localized, recurring pathologies (e.g., repeating Swedish boilerplate disclaimer tokens, getting stuck in punctuation loops, or false-positive safety refusals on public-sector terms), WSP provides a zero-compute, instantaneous patch without the cost or catastrophic forgetting of retraining.</li>
-<li><strong>De-biasing Intermediate Layers:</strong> If larger models (e.g., 8B scale) exhibit mild English drift during multi-turn Swedish dialogues, subtle down-projection interventions can bias hidden states toward Swedish clusters with minimal parameter footprint.</li>
+<li><strong>Checkpoint Diagnostic &amp; Interpretability Probing:</strong> While WSP failed to suppress the &quot;Fjällen&quot; English safety refusal or outperform random controls in language generation, weight-space projection provides an informative analytical probe to measure how multilingual base checkpoints represent language separation across MLP layers.</li>
+<li><strong>Investigating Multi-Layer Interventions at Scale:</strong> If future work explores weight-space modifications on larger foundation models (e.g., 8B scale), interventions must extend beyond isolated MLP down-projections to multi-layer attention projection manifolds ($W_o$, $W_q, W_k, W_v$) and unembeddings ($W_{head}$).</li>
 </ol>
 <h3>Proposed Next Experiment (with Compute on Berzelius):</h3>
 <ul>
@@ -369,7 +289,7 @@ This intervention modifies exactly <strong>86,016 parameters</strong> (0.0174% o
 </ul>
 <hr />
 <h2>7. AI Usage Disclosure</h2>
-<p>In compliance with the assignment instructions, this investigation utilized the following AI tools and workflows (detailed fully in [<code>AI_USAGE.md</code>](file:///c:/Users/admin/Documents/ElVA/repos/Weight-Space%20Programming/AI_USAGE.md)):</p>
+<p>In compliance with the assignment instructions, this investigation utilized the following AI tools and workflows (detailed fully in <a href="../AI_USAGE.md"><code>AI_USAGE.md</code></a>):</p>
 <ul>
 <li><strong>AI Coding and Infrastructure Assistant:</strong> Google Antigravity / Gemini 3.8 Flash was utilized as an interactive programming assistant to generate test harnesses (<code>model_loader.py</code>, <code>evaluator.py</code>, <code>wsp_surgery.py</code>), format Markdown tables, and run execution commands.</li>
 <li><strong>Human-Led Research and Analysis:</strong> The formulation of the research hypothesis, the design of the matched-sparsity rank-1 random noise control, the definition of evaluation metrics, the qualitative failure analysis, and the strategic recommendations for SE.LLMA were designed and directed by the candidate.</li>

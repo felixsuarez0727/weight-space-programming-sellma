@@ -19,7 +19,7 @@ The investigation includes rigorous comparisons against:
 2. **M1 (Prompt Control):** Explicit Swedish system instruction.
 3. **M2 (WSP Targeted Surgery):** Column-sparse rank-1 update targeting 48 aligned intermediate neurons on layers 14 & 16.
 4. **M3 (Random Weight Control):** Matched-sparsity, matched-rank, and matched-Frobenius-norm untargeted noise across 3 random seeds (`[42, 43, 44]`).
-5. **M4 (WSP + Prompt Combined):** Surgical weight edit synergized with prompt conditioning.
+5. **M4 (WSP + Prompt Combined):** Surgical weight edit combined with prompt conditioning.
 6. **M5 (Activation Steering):** Non-destructive inference-time residual steering vector addition (calibrated on dev set).
 
 ---
@@ -41,12 +41,13 @@ The investigation includes rigorous comparisons against:
 
 *\*M3 matches the exact 48-column sparsity mask, rank 1, and Frobenius norm ($0.600$) across 3 seeds (`[42, 43, 44]`).*
 
-1. **System Prompting (M1) Drives the Primary Behavioral Shift:** System instructions account for the primary jump in Swedish compliance (**96.7% → 100%**, completely suppressing the "Fjällen" English refusal). Localized weight editing alone (M2) accounts for only a minor incremental shift in keyword recall and cannot dislodge deep-seated refusal reflexes without prompt-level conditioning.
-2. **Directional Specificity over Random Noise:** Targeted weight surgery (M2) yields higher keyword recall than the 3-seed matched-sparsity/matched-norm random control (M3), confirming that the extracted steering vector $d_l$ captures genuine functional language features rather than arbitrary weight perturbation.
-3. **Activation Steering (M5) Cross-Lingual Penalty:** While inference-time activation steering achieves 8.4% Swedish keyword recall and 0% leakage, it severely impairs English processing (compliance drops to 65.0%, keyword recall drops by -10.1 pp). WSP surgery avoids this catastrophic degradation.
-4. **"Unblocking" vs. "Learning" Deficit:** WSP cannot teach models unlearned Swedish vocabulary or grammar from scratch without gradients. The positive shifts reflect unbiasing latent representations already present in the pretraining distribution.
-5. **Surface Compliance $\neq$ True Linguistic/Factual Competence:** Even when compliance reaches 100%, `Qwen2.5-0.5B-Instruct` displays factual hallucinations (fish in Swedish pancakes), Scandinavian cross-lingual interference (Norwegian/Danish tokens like *for å finne*, *merke på*), and grammatical gender errors (*en hus*, *en äpple*). WSP cannot substitute for foundational continued pre-training.
-6. **Zero Catastrophic Forgetting:** With only 0.0174% of parameters modified, the English regression suite registered preserved compliance and zero syntax collapse under WSP.
+1. **System Prompting (M1) Drives the Primary Behavioral Shift:** System instructions account for the primary jump in Swedish compliance (**96.7% → 100%**, completely suppressing the "Fjällen" English refusal). Localized weight editing alone (M2) accounts for only a minor nominal shift in keyword recall (7.2% vs. 7.1%) and cannot dislodge deep-seated refusal reflexes without prompt-level conditioning.
+2. **No Meaningful Advantage over Baseline or Random Control:** Targeted weight surgery (M2: 93.3% compliance, 7.2% recall, 120.37 PPL, -1.3 pp English recall) showed no meaningful overall performance advantage over the baseline (M0) or the 3-seed matched-sparsity/matched-norm random control (M3: 95.6 ± 1.6% compliance, 7.1 ± 0.0% recall, 118.78 ± 0.15 PPL), aside from reducing token loops from 6.7% to 3.3%—which system prompting (M1) already eliminated entirely (0.0% loops) without modifying model weights.
+3. **Absence of Constructive Synergy in M4:** Combining WSP surgery with prompt conditioning (M4: 96.7% compliance, 7.2% recall, 6.7% loops) slightly degraded prompting alone (M1: 100.0% compliance, 8.2% recall, 0.0% loops), confirming that weight edits do not provide additive linguistic competence over prompt instructions. (The single non-compliant prompt in M4 on `sv_test_04` was classified as `MIXED` due to brevity, retaining 0.0% English leakage overall).
+4. **Activation Steering (M5) Cross-Lingual Penalty:** While inference-time activation steering achieves 8.4% Swedish keyword recall and 0% leakage, it severely impairs English processing (compliance drops to 65.0%, keyword recall drops by -10.1 pp). WSP surgery avoids this catastrophic degradation.
+5. **"Unblocking" vs. "Learning" Deficit:** WSP cannot teach models unlearned Swedish vocabulary or grammar from scratch without gradients. The slight shifts reflect unbiasing latent representations already present in the pretraining distribution.
+6. **Surface Compliance $\neq$ True Linguistic/Factual Competence:** Even when compliance reaches 100%, `Qwen2.5-0.5B-Instruct` displays factual hallucinations (fish in Swedish pancakes), Scandinavian cross-lingual interference (Norwegian/Danish tokens like *for å finne*, *merke på*), and grammatical gender errors (*en hus*, *en äpple*). WSP cannot substitute for foundational continued pre-training.
+7. **Zero Catastrophic Forgetting:** With only 0.0174% of parameters modified, the English regression suite registered preserved compliance and zero syntax collapse under WSP.
 
 ---
 
@@ -54,7 +55,7 @@ The investigation includes rigorous comparisons against:
 
 > **Verdict:** SE.LLMA should **NOT** adopt Weight-Space Programming as a primary training methodology to teach models Swedish language or culture. WSP cannot substitute for Continued Pre-Training (CPT), Supervised Fine-Tuning (SFT), or Direct Preference Optimization (DPO).
 
-* **Where WSP is Viable:** As an ultra-lightweight, zero-compute **post-hoc behavioral patch ("hotfix")** for isolated checkpoint pathologies (e.g., repeating Swedish boilerplate tokens, looping on punctuation, or triggering false English safety refusals).
+* **Narrow Exploratory Research Directions:** While WSP failed to suppress the "Fjällen" English refusal or outperform random controls in text generation, weight-space projections provide an analytical probe to measure how multilingual base checkpoints represent language separation across MLP layers.
 * **Proposed Next Experiment on *Berzelius*:** Evaluate multi-layer SVD subspace weight projection on 8B–14B models on **`EuroEval (formerly ScandEval) / SweSAT`**, comparing compute-normalized throughput against LoRA.
 
 ---
