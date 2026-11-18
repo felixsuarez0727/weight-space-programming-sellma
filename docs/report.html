@@ -159,10 +159,10 @@
 </head>
 <body>
 <h1>Weight-Space Programming for Swedish Language Models: Surgical Behavioral Patching vs. Linguistic Generalization in SE.LLMA</h1>
-<p><strong>Author:</strong> Félix David<br />
+<p><strong>Author:</strong> Felix Suarez<br />
 <strong>Context:</strong> Candidate Research Assignment for SE.LLMA (Linköping University / WASP)<br />
 <strong>Date:</strong> November 2026<br />
-<strong>Repository:</strong> <a href="https://github.com/felixdavid/weight-space-programming-sellma">github.com/felixdavid/weight-space-programming-sellma</a></p>
+<strong>Repository:</strong> <a href="https://github.com/felixsuarez0727/weight-space-programming-sellma">github.com/felixsuarez0727/weight-space-programming-sellma</a></p>
 <hr />
 <h2>Abstract</h2>
 <p>Recent work on Weight-Space Programming (WSP)—notably <em>Sparks of Weight-Space Programming</em> (Takehi et al., 2026)—demonstrated that frontier models can natively inspect raw neural network parameters and perform hyper-localized weight surgeries without gradient descent. In this investigation, we evaluate whether WSP offers a viable pathway for <strong>SE.LLMA</strong>'s national mission of building sovereign Swedish language models. We formulate a falsifiable hypothesis regarding cross-lingual steering and leakage suppression, implement a targeted low-rank weight surgery modifying 0.0174% of parameters in <code>Qwen2.5-0.5B-Instruct</code>, and compare it against rigorous controls: an unchanged baseline (M0), prompt steering (M1), an untargeted Frobenius-norm-matched random weight edit (M3), and a combined surgery+prompt condition (M4), evaluated across 30 held-out Swedish prompts and 20 English regression prompts. Our findings reveal that while targeted weight surgery exhibits genuine directional specificity over random perturbation (yielding peak keyword recall of 9.6% when combined with prompts), it cannot inject unlearned linguistic competence or extinguish deep-seated English refusal reflexes. We conclude that WSP is an effective post-hoc behavioral patch rather than an alternative to representation learning, and provide strategic recommendations for SE.LLMA.</p>

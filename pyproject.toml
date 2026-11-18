@@ -3,7 +3,7 @@ name = "weight-space-programming-sellma"
 version = "0.1.0"
 description = "Investigating Weight-Space Programming for Swedish Language Models (SE.LLMA)"
 authors = [
-    { name = "Félix David" }
+    { name = "Felix Suarez" }
 ]
 readme = "README.md"
 requires-python = ">=3.11"

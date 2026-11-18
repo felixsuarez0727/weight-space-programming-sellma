@@ -3,7 +3,7 @@
 > **Candidate Research & Technical Investigation**  
 > **Topic:** Weight-Space Programming (*Sparks of Weight-Space Programming*, Takehi et al., 2026) applied to Swedish Language Models  
 > **Target Initiative:** SE.LLMA / Linköping University / WASP  
-> **Author:** Félix David  
+> **Author:** Felix Suarez  
 > **Deliverables:** [Research Note (Markdown)](docs/research_note.md) | [PDF Report (0.34 MB)](docs/report.pdf) | [Quantitative Results](results/quantitative_results.json) | [Qualitative Output Examples](results/qualitative_examples.md)
 
 ---
@@ -86,7 +86,7 @@ We formulated a falsifiable hypothesis regarding cross-lingual steering and leak
 
 ### Step 1: Clone Repository and Setup Environment
 ```bash
-git clone https://github.com/felixdavid/weight-space-programming-sellma.git
+git clone https://github.com/felixsuarez0727/weight-space-programming-sellma.git
 cd weight-space-programming-sellma
 
 # With uv (recommended):
@@ -121,3 +121,4 @@ python scripts/generate_pdf.py
 In compliance with the candidate assignment requirements:
 * **LLM Reasoning & Coding Assistance:** Google Antigravity / Gemini 3.8 Flash was utilized as an interactive coding assistant to accelerate the implementation of boilerplate harness files (`model_loader.py`, `evaluator.py`, `wsp_surgery.py`), format the Markdown document, and configure the headless PDF compilation script.
 * **Independent Scientific Decisions:** The critical examination of Takehi et al. (2026), the formulation of the Swedish leakage hypothesis, the design of the matched Frobenius-norm random noise control, the data partitioning, and the strategic recommendations for SE.LLMA were independently conceptualized and directed by the candidate.
+

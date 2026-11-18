@@ -1,9 +1,9 @@
 # Weight-Space Programming for Swedish Language Models: Surgical Behavioral Patching vs. Linguistic Generalization in SE.LLMA
 
-**Author:** Félix David  
+**Author:** Felix Suarez  
 **Context:** Candidate Research Assignment for SE.LLMA (Linköping University / WASP)  
 **Date:** November 2026  
-**Repository:** [github.com/felixdavid/weight-space-programming-sellma](https://github.com/felixdavid/weight-space-programming-sellma)
+**Repository:** [github.com/felixsuarez0727/weight-space-programming-sellma](https://github.com/felixsuarez0727/weight-space-programming-sellma)
 
 ---
 
@@ -133,3 +133,4 @@ Based on these empirical findings, we advise Linköping University and the SE.LL
 In compliance with the assignment requirements, the following AI tools and workflows were utilized:
 * **LLM Reasoning & Coding Assistance:** Google Antigravity / Gemini 3.8 Flash was utilized as a research and development assistant to write boilerplate Python harnesses (`model_loader.py`, `evaluator.py`, `wsp_surgery.py`), format the Markdown report, and assist in drafting experimental scripts.
 * **Autonomous Decision Making:** The formulation of the research hypothesis, the design of the strict Frobenius-norm-matched random control, the multi-category dataset design, and the critical scientific interpretation were designed and directed by the candidate.
+
