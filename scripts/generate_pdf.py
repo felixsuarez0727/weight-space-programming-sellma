@@ -14,6 +14,171 @@ DOCS_DIR = ROOT_DIR / "docs"
 EDGE_EXE = Path("C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe")
 
 
+def render_math_equations(text: str) -> str:
+    """
+    Convert all LaTeX math expressions (display $$...$$ and inline $...$)
+    into clean, publication-ready semantic HTML with zero remaining raw $ or LaTeX markup.
+    """
+    # 1. Display Equations ($$...$$)
+    eq1_html = """
+<div class="math-display">
+  <i>d</i><sub><i>l</i></sub> = 
+  <span class="math-fraction">
+    <span class="numerator"><i>h&#772;</i><sub>sv</sub> &minus; <i>h&#772;</i><sub>en</sub></span>
+    <span class="denominator">&Vert;<i>h&#772;</i><sub>sv</sub> &minus; <i>h&#772;</i><sub>en</sub>&Vert;<sub>2</sub></span>
+  </span>
+  &isin; &#8477;<sup><i>d</i></sup>
+</div>"""
+
+    eq2_html = """
+<div class="math-display">
+  <i>u</i><sub><i>l</i>, <i>j</i></sub> = 
+  <span class="math-cases">
+    <span class="cases-brace">{</span>
+    <span class="cases-content">
+      <span class="cases-row"><span><i>a</i><sub><i>l</i>, <i>j</i></sub></span><span>if <i>j</i> &isin; <i>T</i><sub><i>l</i></sub></span></span>
+      <span class="cases-row"><span>0</span><span>otherwise</span></span>
+    </span>
+  </span>,
+  &emsp;&emsp;
+  <i>u</i><sub><i>l</i></sub> &larr; 
+  <span class="math-fraction">
+    <span class="numerator"><i>u</i><sub><i>l</i></sub></span>
+    <span class="denominator">&Vert;<i>u</i><sub><i>l</i></sub>&Vert;<sub>2</sub></span>
+  </span>
+</div>"""
+
+    eq3_html = """
+<div class="math-display">
+  &Delta;<i>W</i><sub>down</sub><sup>(<i>l</i>)</sup> = &alpha; &middot; <i>d</i><sub><i>l</i></sub> &otimes; <i>u</i><sub><i>l</i></sub><sup><i>T</i></sup> = &alpha; &middot; <i>d</i><sub><i>l</i></sub> <i>u</i><sub><i>l</i></sub><sup><i>T</i></sup> &isin; &#8477;<sup><i>d</i> &times; <i>d</i><sub>ff</sub></sup>
+</div>"""
+
+    def replace_display_block(match):
+        raw = match.group(1).strip()
+        if "d_l" in raw and ("bar{h}" in raw or "h_{sv}" in raw):
+            return eq1_html
+        elif "u_{l" in raw or "begin{cases}" in raw:
+            return eq2_html
+        elif "Delta W_{down}" in raw:
+            return eq3_html
+        return f'<div class="math-display">{raw}</div>'
+
+    # Replace all $$...$$ display blocks regardless of whitespace or indentation
+    text = re.sub(r"\$\$(.*?)\$\$", replace_display_block, text, flags=re.DOTALL)
+
+    # 2. Known Complex Inline Math Replacements (sorted by length descending so longer patterns match first!)
+    exact_inline_map = [
+        (
+            r"$\mathcal{P} = \exp\left(-\frac{1}{N_{tok}}\sum \log P(x_i)\right)$",
+            '<span class="math-inline"><i>P</i> = exp(&minus; <sup>1</sup>/<sub><i>N</i><sub>tok</sub></sub> &sum; log <i>P</i>(<i>x</i><sub><i>i</i></sub>))</span>',
+        ),
+        (
+            r"$\|\Delta W_{down}^{(l)}\|_F = \alpha \|d_l\|_2 \|u_l\|_2 = 0.600$",
+            '<span class="math-inline">&Vert;&Delta;<i>W</i><sub>down</sub><sup>(<i>l</i>)</sup>&Vert;<sub>F</sub> = &alpha;&Vert;<i>d</i><sub><i>l</i></sub>&Vert;<sub>2</sub>&Vert;<i>u</i><sub><i>l</i></sub>&Vert;<sub>2</sub> = 0.600</span>',
+        ),
+        (
+            r"$\Delta W_{down}^{(l)}$",
+            '<span class="math-inline">&Delta;<i>W</i><sub>down</sub><sup>(<i>l</i>)</sup></span>',
+        ),
+        (
+            r"$W_{down} \in \mathbb{R}^{d \times d_{ff}}$",
+            '<span class="math-inline"><i>W</i><sub>down</sub> &isin; &#8477;<sup><i>d</i> &times; <i>d</i><sub>ff</sub></sup></span>',
+        ),
+        (
+            r"$W_{down}^{(l)}$",
+            '<span class="math-inline"><i>W</i><sub>down</sub><sup>(<i>l</i>)</sup></span>',
+        ),
+        (
+            r"$a_{l, j} = d_l^T W_{down}^{(l)}[:, j]$",
+            '<span class="math-inline"><i>a</i><sub><i>l</i>, <i>j</i></sub> = <i>d</i><sub><i>l</i></sub><sup><i>T</i></sup> <i>W</i><sub>down</sub><sup>(<i>l</i>)</sup>[:, <i>j</i>]</span>',
+        ),
+        (
+            r"$j \in \{1, \dots, d_{ff}\}$",
+            '<span class="math-inline"><i>j</i> &isin; {1, &hellip;, <i>d</i><sub>ff</sub>}</span>',
+        ),
+        (
+            r"$d_{rand} \sim \mathcal{N}(0, I_d)$",
+            '<span class="math-inline"><i>d</i><sub>rand</sub> &sim; <i>N</i>(0, <i>I</i><sub><i>d</i></sub>)</span>',
+        ),
+        (
+            r"$u_{rand} \in \mathbb{R}^{d_{ff}}$",
+            '<span class="math-inline"><i>u</i><sub>rand</sub> &isin; &#8477;<sup><i>d</i><sub>ff</sub></sup></span>',
+        ),
+        (
+            r"$h_l \leftarrow h_l + \beta d_l$",
+            '<span class="math-inline"><i>h</i><sub><i>l</i></sub> &larr; <i>h</i><sub><i>l</i></sub> + &beta;<i>d</i><sub><i>l</i></sub></span>',
+        ),
+        (
+            r"$\beta \in [0.5, 1.0, 2.0]$",
+            '<span class="math-inline">&beta; &isin; [0.5, 1.0, 2.0]</span>',
+        ),
+        (
+            r"$W_q, W_k, W_v$",
+            '<span class="math-inline"><i>W</i><sub>q</sub>, <i>W</i><sub>k</sub>, <i>W</i><sub>v</sub></span>',
+        ),
+        (
+            r"$u_l \in \mathbb{R}^{d_{ff}}$",
+            '<span class="math-inline"><i>u</i><sub><i>l</i></sub> &isin; &#8477;<sup><i>d</i><sub>ff</sub></sup></span>',
+        ),
+        (
+            r"$j \in \mathcal{T}_l$",
+            '<span class="math-inline"><i>j</i> &isin; <i>T</i><sub><i>l</i></sub></span>',
+        ),
+        (r"$\mathcal{T}_l$", '<span class="math-inline"><i>T</i><sub><i>l</i></sub></span>'),
+        (r"$W_{down}$", '<span class="math-inline"><i>W</i><sub>down</sub></span>'),
+        (r"$W_{head}$", '<span class="math-inline"><i>W</i><sub>head</sub></span>'),
+        (r"$W_o$", '<span class="math-inline"><i>W</i><sub>o</sub></span>'),
+        (r"$\alpha = 0.6$", '<span class="math-inline">&alpha; = 0.6</span>'),
+        (r"$\beta = 2.0$", '<span class="math-inline">&beta; = 2.0</span>'),
+        (r"$\beta=2.0$", '<span class="math-inline">&beta; = 2.0</span>'),
+        (r"$\approx 0.600$", '<span class="math-inline">&asymp; 0.600</span>'),
+        (r"$\pm$", '<span class="math-inline">&plusmn;</span>'),
+        (r"$\neq$", '<span class="math-inline">&ne;</span>'),
+        (r"$d=896$", '<span class="math-inline"><i>d</i> = 896</span>'),
+        (r"$d_{ff}=4864$", '<span class="math-inline"><i>d</i><sub>ff</sub> = 4864</span>'),
+        (r"$d_l$", '<span class="math-inline"><i>d</i><sub><i>l</i></sub></span>'),
+        (r"$u_l$", '<span class="math-inline"><i>u</i><sub><i>l</i></sub></span>'),
+        (r"$k=48$", '<span class="math-inline"><i>k</i> = 48</span>'),
+        (r"$k$", '<span class="math-inline"><i>k</i></span>'),
+        (r"$|a_{l, j}|$", '<span class="math-inline">|<i>a</i><sub><i>l</i>, <i>j</i></sub>|</span>'),
+        (r"$= 0.0$", '<span class="math-inline">= 0.0</span>'),
+        (r"$0.600$", '<span class="math-inline">0.600</span>'),
+    ]
+
+    # Sort by raw pattern length descending
+    exact_inline_map.sort(key=lambda x: len(x[0]), reverse=True)
+
+    for raw, repl in exact_inline_map:
+        text = text.replace(raw, repl)
+
+    # 3. Dynamic regex replacements for $N=...$
+    text = re.sub(
+        r"\$N\s*=\s*(\d+)\$",
+        r'<span class="math-inline"><i>N</i> = \1</span>',
+        text,
+    )
+
+    # 4. Fallback cleanup: catch any remaining simple $...$ inline math
+    def clean_generic_math(match):
+        inner = match.group(1).strip()
+        inner = inner.replace(r"\alpha", "&alpha;")
+        inner = inner.replace(r"\beta", "&beta;")
+        inner = inner.replace(r"\Delta", "&Delta;")
+        inner = inner.replace(r"\sim", "&sim;")
+        inner = inner.replace(r"\approx", "&asymp;")
+        inner = inner.replace(r"\pm", "&plusmn;")
+        inner = inner.replace(r"\neq", "&ne;")
+        inner = inner.replace(r"\in", "&isin;")
+        inner = inner.replace(r"\mathbb{R}", "&#8477;")
+        inner = re.sub(r"([A-Za-z]+)_\{([^}]+)\}", r"<i>\1</i><sub>\2</sub>", inner)
+        inner = re.sub(r"([A-Za-z]+)_([A-Za-z0-9]+)", r"<i>\1</i><sub>\2</sub>", inner)
+        return f'<span class="math-inline">{inner}</span>'
+
+    text = re.sub(r"\$([^\$\n]+?)\$", clean_generic_math, text)
+
+    return text
+
+
 def markdown_to_html(md_text: str) -> str:
     """Convert academic markdown report into publication-ready HTML with CSS styling."""
     abs_plot_path = (ROOT_DIR / "results" / "plots" / "comparison_metrics.png").resolve().as_uri()
@@ -26,7 +191,7 @@ def markdown_to_html(md_text: str) -> str:
 <div class="workflow-box">
   <div class="workflow-step"><strong>1. Residual Probe</strong><br>Dev Set (10 SV / 10 EN)</div>
   <div class="workflow-arrow">&rarr;</div>
-  <div class="workflow-step"><strong>2. Direction Vector</strong><br>Layers 14 & 16 ($d_l$)</div>
+  <div class="workflow-step"><strong>2. Direction Vector</strong><br>Layers 14 & 16 (<i>d</i><sub><i>l</i></sub>)</div>
   <div class="workflow-arrow">&rarr;</div>
   <div class="workflow-step"><strong>3. Interventions</strong><br>WSP vs. Random Matched</div>
   <div class="workflow-arrow">&rarr;</div>
@@ -35,6 +200,9 @@ def markdown_to_html(md_text: str) -> str:
 """
 
     processed_md = mermaid_pattern.sub(replace_mermaid, md_text)
+
+    # Convert all LaTeX math equations to clean HTML BEFORE markdown rendering
+    processed_md = render_math_equations(processed_md)
 
     # Initialize markdown parser with GFM tables
     md = markdown_it.MarkdownIt("gfm-like").disable("linkify")
@@ -47,6 +215,13 @@ def markdown_to_html(md_text: str) -> str:
         rendered_body,
     )
 
+    # Ensure link to AI_USAGE.md points to online repository for standalone PDF viewing
+    rendered_body = re.sub(
+        r'href="(?:\.\./AI_USAGE\.md|AI_USAGE\.md)"',
+        'href="https://github.com/felixsuarez0727/weight-space-programming-sellma/blob/main/AI_USAGE.md"',
+        rendered_body,
+    )
+
     full_html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -55,7 +230,7 @@ def markdown_to_html(md_text: str) -> str:
 <style>
   @page {{
     size: A4;
-    margin: 14mm 14mm 14mm 14mm;
+    margin: 12mm 12mm 12mm 12mm;
     @bottom-center {{
       content: counter(page);
       font-size: 8pt;
@@ -66,57 +241,57 @@ def markdown_to_html(md_text: str) -> str:
   body {{
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: #1e293b;
-    line-height: 1.42;
-    font-size: 9pt;
+    line-height: 1.40;
+    font-size: 8.8pt;
     margin: 0;
     padding: 0;
   }}
   h1 {{
-    font-size: 15pt;
+    font-size: 14.5pt;
     font-weight: 800;
     text-align: center;
-    margin-bottom: 4px;
+    margin-bottom: 3px;
     color: #0f172a;
     line-height: 1.2;
   }}
   h2 {{
-    font-size: 10.5pt;
+    font-size: 10.2pt;
     font-weight: 700;
     color: #0f172a;
     border-bottom: 1px solid #cbd5e1;
     padding-bottom: 2px;
-    margin-top: 10px;
-    margin-bottom: 4px;
+    margin-top: 9px;
+    margin-bottom: 3px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
     page-break-after: avoid;
   }}
   h3 {{
-    font-size: 9.5pt;
+    font-size: 9.2pt;
     font-weight: 600;
     color: #1e293b;
-    margin-top: 7px;
+    margin-top: 6px;
     margin-bottom: 2px;
     page-break-after: avoid;
   }}
   h4 {{
-    font-size: 9pt;
+    font-size: 8.8pt;
     font-weight: 600;
     color: #334155;
-    margin-top: 6px;
+    margin-top: 5px;
     margin-bottom: 2px;
     page-break-after: avoid;
   }}
   p {{
     margin-top: 0;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     text-align: justify;
   }}
   blockquote {{
     background: #f1f5f9;
     border-left: 3px solid #0284c7;
-    margin: 6px 0;
-    padding: 4px 10px;
+    margin: 5px 0;
+    padding: 4px 8px;
     font-style: italic;
     color: #1e293b;
     border-radius: 0 4px 4px 0;
@@ -124,19 +299,20 @@ def markdown_to_html(md_text: str) -> str:
   table {{
     width: 100%;
     border-collapse: collapse;
-    margin: 8px 0;
-    font-size: 7.8pt;
+    margin: 6px 0;
+    font-size: 7.2pt;
     page-break-inside: avoid;
   }}
   th, td {{
     border: 1px solid #cbd5e1;
-    padding: 4px 6px;
+    padding: 3px 4px;
     text-align: left;
   }}
   th {{
-    background-color: #f8fafc;
+    background-color: #f1f5f9;
     font-weight: 700;
     color: #0f172a;
+    font-size: 7.2pt;
   }}
   tr:nth-child(even) {{
     background-color: #f8fafc;
@@ -146,63 +322,121 @@ def markdown_to_html(md_text: str) -> str:
     padding: 1px 3px;
     border-radius: 3px;
     font-family: Consolas, "Courier New", monospace;
-    font-size: 8pt;
+    font-size: 7.8pt;
     color: #0369a1;
   }}
+  pre {{
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 7.6pt;
+    line-height: 1.25;
+    overflow-x: auto;
+    margin: 4px 0;
+  }}
   img {{
-    max-width: 82%;
+    max-width: 100%;
     height: auto;
     display: block;
-    margin: 6px auto 2px auto;
-    border: 1px solid #e2e8f0;
+    margin: 6px auto;
     border-radius: 4px;
-    page-break-inside: avoid;
+    border: 1px solid #e2e8f0;
   }}
   .figure-caption {{
     text-align: center;
     font-size: 7.5pt;
     color: #64748b;
     margin-top: 2px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     font-style: italic;
-  }}
-  ul, ol {{
-    margin-top: 0;
-    margin-bottom: 5px;
-    padding-left: 16px;
-  }}
-  li {{
-    margin-bottom: 2px;
-  }}
-  hr {{
-    border: 0;
-    border-top: 1px solid #e2e8f0;
-    margin: 8px 0;
   }}
   .workflow-box {{
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: space-around;
     background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-radius: 5px;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
     padding: 6px 10px;
     margin: 6px 0;
-    page-break-inside: avoid;
+    font-size: 7.5pt;
   }}
   .workflow-step {{
     background: #ffffff;
-    border: 1px solid #94a3b8;
-    border-radius: 4px;
-    padding: 4px 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 3px;
+    padding: 3px 6px;
     text-align: center;
-    font-size: 7.5pt;
-    line-height: 1.2;
+    flex: 1;
+    margin: 0 3px;
   }}
   .workflow-arrow {{
-    font-size: 12pt;
+    font-size: 11pt;
     color: #0284c7;
     font-weight: bold;
+    padding: 0 2px;
+  }}
+  .math-display {{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 6px 0;
+    font-size: 8.8pt;
+    font-family: "Cambria Math", "Latin Modern Math", "STIX Two Math", "Times New Roman", serif;
+  }}
+  .math-fraction {{
+    display: inline-flex;
+    flex-direction: column;
+    vertical-align: middle;
+    text-align: center;
+    padding: 0 4px;
+    font-size: 0.9em;
+  }}
+  .math-fraction .numerator {{
+    border-bottom: 1px solid #1e293b;
+    padding-bottom: 1px;
+  }}
+  .math-fraction .denominator {{
+    padding-top: 1px;
+  }}
+  .math-cases {{
+    display: inline-flex;
+    align-items: center;
+    margin: 0 4px;
+  }}
+  .cases-brace {{
+    font-size: 2.1em;
+    font-weight: 200;
+    line-height: 1;
+    margin-right: 3px;
+  }}
+  .cases-content {{
+    display: inline-flex;
+    flex-direction: column;
+    text-align: left;
+    font-size: 0.9em;
+    gap: 2px;
+  }}
+  .cases-row {{
+    display: flex;
+    gap: 14px;
+  }}
+  .math-inline {{
+    font-family: "Cambria Math", "Latin Modern Math", "STIX Two Math", "Times New Roman", serif;
+    font-size: 8.8pt;
+  }}
+  hr {{
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 7px 0;
+  }}
+  a {{
+    color: #0284c7;
+    text-decoration: none;
+  }}
+  a:hover {{
+    text-decoration: underline;
   }}
 </style>
 </head>
@@ -238,13 +472,21 @@ def build_pdf():
         return
 
     print("Compiling PDF via Microsoft Edge headless...")
+    if pdf_file.exists():
+        try:
+            pdf_file.unlink()
+        except Exception:
+            pass
+
     cmd = [
         str(EDGE_EXE),
         "--headless",
         "--disable-gpu",
         "--run-all-compositor-stages-before-draw",
+        "--no-pdf-header-footer",
+        "--print-to-pdf-no-header",
         f"--print-to-pdf={pdf_file.resolve()}",
-        str(html_file.resolve()),
+        str(html_file.resolve().as_uri()),
     ]
     res = subprocess.run(cmd, capture_output=True, text=True)
     if pdf_file.exists():
