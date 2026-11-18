@@ -18,6 +18,21 @@ def set_seed(seed: int = 42) -> None:
         torch.cuda.manual_seed_all(seed)
 
 
+def get_model_revision(model: torch.nn.Module, model_id: str = "Qwen/Qwen2.5-0.5B-Instruct") -> str:
+    """Capture exact model revision / commit SHA from model config or Hugging Face Hub."""
+    commit_hash = getattr(model.config, "_commit_hash", None)
+    if commit_hash:
+        return str(commit_hash)
+    try:
+        from huggingface_hub import HfApi
+        info = HfApi().model_info(model_id)
+        if info and getattr(info, "sha", None):
+            return str(info.sha)
+    except Exception:
+        pass
+    return "unknown"
+
+
 def load_model_and_tokenizer(
     model_id: str = "Qwen/Qwen2.5-0.5B-Instruct",
     device: str = "cpu",
@@ -25,7 +40,7 @@ def load_model_and_tokenizer(
 ):
     """Load pretrained model and tokenizer with reproducible defaults."""
     set_seed(42)
-    tokenizer = AutoTokenizer.from_pretrained(model_id, fix_markdown=False)
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
@@ -85,4 +100,3 @@ def generate_response(
     generated_tokens = output_ids[0][prompt_len:]
     response = tokenizer.decode(generated_tokens, skip_special_tokens=True).strip()
     return response
-

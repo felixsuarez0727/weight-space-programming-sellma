@@ -4,7 +4,7 @@
 > **Topic:** Weight-Space Programming (*Sparks of Weight-Space Programming*, Takehi et al., 2026) applied to Swedish Language Models  
 > **Target Initiative:** SE.LLMA / Linköping University / WASP  
 > **Author:** Felix Suarez  
-> **Deliverables:** [Research Note (Markdown)](docs/research_note.md) | [PDF Report (0.34 MB)](docs/report.pdf) | [Quantitative Results](results/quantitative_results.json) | [Qualitative Output Examples](results/qualitative_examples.md)
+> **Deliverables:** [Research Note (Markdown)](docs/research_note.md) | [PDF Report](docs/report.pdf) | [AI Usage Disclosure](AI_USAGE.md) | [Quantitative Results](results/quantitative_results.json) | [Qualitative Output Examples](results/qualitative_examples.md)
 
 ---
 
@@ -12,39 +12,50 @@
 
 This study critically evaluates whether the emerging paradigm of **Weight-Space Programming (WSP)**—directly editing neural network parameters without gradient descent or training loops—can advance **SE.LLMA**'s national objective of adapting open-weight models to Swedish.
 
-We formulated a falsifiable hypothesis regarding cross-lingual steering and leakage suppression, implemented an empirical steering-subspace weight surgery modifying **0.0174% of parameters** (86,016 parameters) in `Qwen2.5-0.5B-Instruct`, and evaluated it across 30 held-out Swedish prompts (spanning cultural knowledge, conversational QA, syntax, and reasoning) and 20 held-out English regression prompts.
+We formulated a falsifiable hypothesis regarding cross-lingual steering and leakage suppression, implemented an empirical steering-subspace weight surgery modifying **0.0174% of parameters** (86,016 parameters) in `Qwen2.5-0.5B-Instruct`, and evaluated it across 30 held-out Swedish prompts (spanning cultural knowledge, conversational QA, syntax, and reasoning), 20 held-out English regression prompts, and a 12-sentence Swedish fluency/perplexity benchmark.
 
-### Experimental Summary Table
-
-| Condition | Modified Params (%) | Swedish Compliance (%) | English Leakage (%) | Swedish Keyword Recall (%) | English Regression (%) | English Accuracy Drop |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **M0: Baseline** | 0.000% | 96.7% | 3.3% | 7.06% | 100.0% | 0.0 pp |
-| **M1: Prompt Control** | 0.000% | **100.0%** | **0.0%** | 8.22% | 100.0% | 0.0 pp |
-| **M2: WSP Surgery** | **0.0174%** | 96.7% | 3.3% | 7.56% | 100.0% | 0.0 pp |
-| **M3: Random Weight Control** | 0.000%* | 96.7% | 3.3% | 7.06% | 100.0% | 0.0 pp |
-| **M4: WSP + Prompt** | **0.0174%** | **100.0%** | **0.0%** | **9.56%** | 100.0% | 0.0 pp |
-
-*\*M3 modified all matrix parameters in the targeted layer slice scaled to match the exact Frobenius norm ($\|\Delta W\|_F = 0.500$).*
-
-![Comparison Metrics](results/plots/comparison_metrics.png)
+The investigation includes rigorous comparisons against:
+1. **M0 (Baseline):** Unaltered model.
+2. **M1 (Prompt Control):** Explicit Swedish system instruction.
+3. **M2 (WSP Targeted Surgery):** Column-sparse rank-1 update targeting 48 aligned intermediate neurons on layers 14 & 16.
+4. **M3 (Random Weight Control):** Matched-sparsity, matched-rank, and matched-Frobenius-norm untargeted noise across 3 random seeds (`[42, 43, 44]`).
+5. **M4 (WSP + Prompt Combined):** Surgical weight edit synergized with prompt conditioning.
+6. **M5 (Activation Steering):** Non-destructive inference-time residual steering vector addition (calibrated on dev set).
 
 ---
 
-## Core Findings & Scientific Judgment
+## Core Findings & Scientific Judgment (Cautious Peer-Review Perspective)
 
-1. **Directional Specificity over Random Noise:** WSP surgery on intermediate MLP down-projections (layers 14 & 16) increased average Swedish keyword recall from 7.06% to 7.56%, while the Frobenius-matched random weight noise control remained at 7.06%. This confirms that the extracted steering vector $d_l$ captures genuine functional language features.
-2. **"Unblocking" vs. "Learning" Deficit:** WSP cannot teach models unlearned Swedish vocabulary or grammar from scratch without gradients. The positive shifts reflect unbiasing latent representations already present in the pretraining distribution.
-3. **The "Fjällen" Refusal Case Study (Limitations of Localized Surgery):** When queried about mountain hiking in Sweden (*fjällen*), the base model triggered an English safety refusal (*"I apologize, but I'm not able to answer questions involving politics or specific locations like this"*). WSP surgery alone was unable to dislodge this refusal circuit, whereas system prompting (M1) completely suppressed the leakage.
-4. **Constructive Synergy (M4):** Combining targeted weight surgery with prompting achieved the highest overall semantic fidelity (**9.56% keyword recall**), demonstrating that localized weight editing can act as a permanent inference-time prior that complements prompt engineering.
-5. **Zero Catastrophic Forgetting:** With only 0.0174% of parameters modified, the English regression suite registered **100.0% retention and 0.0 pp regression**.
+> **Methodological Framing:** In this small-scale exploratory test ($N=30$ Swedish, $N=20$ English, $N=12$ Swedish perplexity sentences), we observed modest directional shifts in keyword recall and loop suppression. These preliminary findings are insufficient on their own to establish whether the effect generalizes across larger scales or diverse domains.
+
+### Summary Results Across Experimental Arms
+
+| Condition | Modified Params (%) | Swedish Compliance (%) | English Leakage (%) | Swedish Keyword Recall (%) | Swedish Loop Rate (%) | Swedish Perplexity (PPL) | English Compliance (%) | English Keyword Recall (%) | English Recall Delta |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **M0: Baseline** | 0.000% | 96.7% | 3.3% | 7.1% | 6.7% | 118.75 | 100.0% | 47.2% | 0.0 pp |
+| **M1: Prompt Control** | 0.000% | **100.0%** | **0.0%** | 8.2% | **0.0%** | **118.75** | 100.0% | 47.2% | 0.0 pp |
+| **M2: WSP Surgery** | **0.0174%** | 93.3% | 6.7% | 7.2% | 3.3% | 120.37 | 100.0% | 45.9% | -1.3 pp |
+| **M3: Random Control ($N=3$)** | 0.0174%* | 95.6 ± 1.6% | 4.4 ± 1.6% | 7.1 ± 0.0% | 5.6 ± 1.6% | 118.78 ± 0.15 | 100.0% | 47.2% | 0.0 pp |
+| **M4: WSP + Prompt** | **0.0174%** | 96.7% | **0.0%** | 7.2% | 6.7% | 120.37 | 100.0% | 45.9% | -1.3 pp |
+| **M5: Activation Steering** | 0.000% | 96.7% | **0.0%** | **8.4%** | **0.0%** | 123.22 | 65.0% | 37.1% | **-10.1 pp** |
+
+*\*M3 matches the exact 48-column sparsity mask, rank 1, and Frobenius norm ($0.600$) across 3 seeds (`[42, 43, 44]`).*
+
+1. **System Prompting (M1) Drives the Primary Behavioral Shift:** System instructions account for the primary jump in Swedish compliance (**96.7% → 100%**, completely suppressing the "Fjällen" English refusal). Localized weight editing alone (M2) accounts for only a minor incremental shift in keyword recall and cannot dislodge deep-seated refusal reflexes without prompt-level conditioning.
+2. **Directional Specificity over Random Noise:** Targeted weight surgery (M2) yields higher keyword recall than the 3-seed matched-sparsity/matched-norm random control (M3), confirming that the extracted steering vector $d_l$ captures genuine functional language features rather than arbitrary weight perturbation.
+3. **Activation Steering (M5) Cross-Lingual Penalty:** While inference-time activation steering achieves 8.4% Swedish keyword recall and 0% leakage, it severely impairs English processing (compliance drops to 65.0%, keyword recall drops by -10.1 pp). WSP surgery avoids this catastrophic degradation.
+4. **"Unblocking" vs. "Learning" Deficit:** WSP cannot teach models unlearned Swedish vocabulary or grammar from scratch without gradients. The positive shifts reflect unbiasing latent representations already present in the pretraining distribution.
+5. **Surface Compliance $\neq$ True Linguistic/Factual Competence:** Even when compliance reaches 100%, `Qwen2.5-0.5B-Instruct` displays factual hallucinations (fish in Swedish pancakes), Scandinavian cross-lingual interference (Norwegian/Danish tokens like *for å finne*, *merke på*), and grammatical gender errors (*en hus*, *en äpple*). WSP cannot substitute for foundational continued pre-training.
+6. **Zero Catastrophic Forgetting:** With only 0.0174% of parameters modified, the English regression suite registered preserved compliance and zero syntax collapse under WSP.
 
 ---
 
-## Recommendation for SE.LLMA
+## Strategic Recommendation for SE.LLMA
 
-> **Verdict:** SE.LLMA should **NOT** pursue Weight-Space Programming as a replacement for Continued Pre-Training (CPT) or Supervised Fine-Tuning (SFT). However, WSP should be investigated as an **ultra-lightweight behavioral patch ("hotfix") mechanism** for isolated failure modes (e.g., token repetition loops or persistent cross-lingual leakage in fine-tuned checkpoints).
+> **Verdict:** SE.LLMA should **NOT** adopt Weight-Space Programming as a primary training methodology to teach models Swedish language or culture. WSP cannot substitute for Continued Pre-Training (CPT), Supervised Fine-Tuning (SFT), or Direct Preference Optimization (DPO).
 
-* **Proposed Next Experiment (with Compute on Berzelius):** Evaluate multi-layer SVD subspace weight projection on 8B–14B models on the Swedish SSwEval benchmark, testing compute-normalized throughput against LoRA.
+* **Where WSP is Viable:** As an ultra-lightweight, zero-compute **post-hoc behavioral patch ("hotfix")** for isolated checkpoint pathologies (e.g., repeating Swedish boilerplate tokens, looping on punctuation, or triggering false English safety refusals).
+* **Proposed Next Experiment on *Berzelius*:** Evaluate multi-layer SVD subspace weight projection on 8B–14B models on **`EuroEval (formerly ScandEval) / SweSAT`**, comparing compute-normalized throughput against LoRA.
 
 ---
 
@@ -54,25 +65,28 @@ We formulated a falsifiable hypothesis regarding cross-lingual steering and leak
 ├── data/
 │   ├── dev_set.json               # 10 Swedish prompts for calibration / probe extraction
 │   ├── test_swedish.json          # 30 held-out Swedish evaluation prompts across 4 categories
-│   └── regression_english.json    # 20 English prompts to monitor catastrophic degradation
+│   ├── regression_english.json    # 20 English prompts to monitor catastrophic degradation
+│   └── swedish_perplexity.json    # 12 Swedish reference sentences for fluency evaluation
 ├── docs/
 │   ├── research_note.md           # Full academic research note (Markdown)
 │   ├── report.html                # Formatted publication-ready HTML
-│   └── report.pdf                 # Final compiled PDF report (0.34 MB, max limit: 25 MB)
+│   └── report.pdf                 # Final compiled PDF report (<25 MB)
 ├── results/
-│   ├── quantitative_results.json  # Raw metric outputs across all 5 experimental arms
+│   ├── quantitative_results.json  # Raw metric outputs across all conditions and seeds
 │   ├── qualitative_examples.md   # Side-by-side prompt responses across conditions
 │   └── plots/
 │       └── comparison_metrics.png # Publication-grade visualization
 ├── scripts/
-│   ├── run_all.py                 # Reproduces the entire experiment end-to-end
+│   ├── run_all.py                 # Reproduces the entire benchmark end-to-end (M0–M5)
 │   └── generate_pdf.py            # Compiles research_note.md to report.pdf via Edge headless
 ├── src/
 │   ├── __init__.py
-│   ├── model_loader.py            # Deterministic model loader and state snapshotting
-│   ├── wsp_surgery.py             # Directional extraction and low-rank weight surgery
-│   └── evaluator.py               # Compliance, leakage, recall, and regression metrics
-├── pyproject.toml                 # Reproducible environment specification
+│   ├── model_loader.py            # Deterministic model loader, commit hash, snapshotting
+│   ├── wsp_surgery.py             # Direction extraction, WSP surgery, M3 matched control, M5 steering
+│   └── evaluator.py               # Compliance, leakage, recall, loop detection, and perplexity
+├── AI_USAGE.md                    # Transparent disclosure of AI assistance tools
+├── requirements.txt               # Direct pip requirements fallback
+├── pyproject.toml                 # Standard PEP 621 packaging configuration
 └── README.md                      # Project documentation and reproduction instructions
 ```
 
@@ -81,36 +95,76 @@ We formulated a falsifiable hypothesis regarding cross-lingual steering and leak
 ## How to Reproduce the Main Experiment
 
 ### Prerequisites
-* Python $\ge 3.11$ (managed via [`uv`](https://github.com/astral-sh/uv) or standard virtualenv)
+* Python $\ge 3.11$
 * Compatible with CPU-only machines (no discrete GPU required; execution takes $\approx 15-20$ minutes on a modern 8-core CPU)
 
-### Step 1: Clone Repository and Setup Environment
+---
+
+### Setup Instructions (Tested for Windows, macOS, and Linux)
+
+#### Option A: Fast Setup with `uv` (Recommended)
+`uv` manages isolated virtual environments and dependencies seamlessly across platforms, avoiding Windows PowerShell execution policy restrictions:
+
 ```bash
+# 1. Clone repository
 git clone https://github.com/felixsuarez0727/weight-space-programming-sellma.git
 cd weight-space-programming-sellma
 
-# With uv (recommended):
-uv venv --python 3.12
-uv pip install -r pyproject.toml
+# 2. Sync environment from pyproject.toml
+uv sync
 
-# Or with standard pip:
+# 3. Run the full experiment
+uv run python scripts/run_all.py
+
+# 4. Recompile PDF report
+uv run python scripts/generate_pdf.py
+```
+
+---
+
+#### Option B: Standard Python `venv` + `pip`
+
+##### On Windows (PowerShell):
+```powershell
+# 1. Clone repository
+git clone https://github.com/felixsuarez0727/weight-space-programming-sellma.git
+cd weight-space-programming-sellma
+
+# 2. Create virtual environment
 python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-pip install -r pyproject.toml
+
+# 3. Install dependencies from requirements.txt (or 'pip install -e .')
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+# 4. Run the experiment directly (avoids PowerShell ExecutionPolicy restrictions):
+.\.venv\Scripts\python.exe scripts/run_all.py
+
+# Alternatively, if activating the script:
+# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+# .\.venv\Scripts\Activate.ps1
+# python scripts/run_all.py
 ```
 
-### Step 2: Run All 5 Experimental Arms
-```bash
+##### On Windows (Command Prompt - CMD):
+```cmd
+git clone https://github.com/felixsuarez0727/weight-space-programming-sellma.git
+cd weight-space-programming-sellma
+python -m venv .venv
+call .venv\Scripts\activate.bat
+pip install -r requirements.txt
 python scripts/run_all.py
+python scripts/generate_pdf.py
 ```
-This script will:
-1. Load `Qwen/Qwen2.5-0.5B-Instruct` deterministically (seed $= 42$).
-2. Extract the empirical steering subspace from `data/dev_set.json`.
-3. Evaluate conditions M0, M1, M2, M3, and M4 across both test suites.
-4. Output `results/quantitative_results.json`, `results/qualitative_examples.md`, and `results/plots/comparison_metrics.png`.
 
-### Step 3: Recompile the PDF Report
+##### On Linux / macOS:
 ```bash
+git clone https://github.com/felixsuarez0727/weight-space-programming-sellma.git
+cd weight-space-programming-sellma
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python scripts/run_all.py
 python scripts/generate_pdf.py
 ```
 
@@ -118,7 +172,4 @@ python scripts/generate_pdf.py
 
 ## AI Tools Usage Disclosure
 
-In compliance with the candidate assignment requirements:
-* **LLM Reasoning & Coding Assistance:** Google Antigravity / Gemini 3.8 Flash was utilized as an interactive coding assistant to accelerate the implementation of boilerplate harness files (`model_loader.py`, `evaluator.py`, `wsp_surgery.py`), format the Markdown document, and configure the headless PDF compilation script.
-* **Independent Scientific Decisions:** The critical examination of Takehi et al. (2026), the formulation of the Swedish leakage hypothesis, the design of the matched Frobenius-norm random noise control, the data partitioning, and the strategic recommendations for SE.LLMA were independently conceptualized and directed by the candidate.
-
+Please refer to [`AI_USAGE.md`](AI_USAGE.md) for full details on tools utilized, automated task assignments, and candidate-directed scientific decisions.

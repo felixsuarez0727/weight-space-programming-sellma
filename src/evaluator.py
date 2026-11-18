@@ -4,14 +4,17 @@ Evaluation harness for Swedish Language Models and Regression Controls.
 Computes:
 1. Swedish Compliance Rate (% of outputs purely in Swedish without leakage).
 2. English Leakage Rate (% of outputs switching to English).
-3. Keyword / Concept Recall (% of domain keywords correctly retrieved).
+3. Keyword / Concept Recall (% of domain keywords correctly retrieved, ignoring empty sets).
 4. Repetition Loop Detection (pathological degeneracies).
 5. Cross-Lingual English Regression Rate (checking preservation of general abilities).
+6. Cross-Entropy Language Perplexity on reference sets.
 """
 
+import math
 import re
 from typing import Any
 import numpy as np
+import torch
 
 
 SWEDISH_STOPWORDS = {
@@ -34,7 +37,7 @@ ENGLISH_STOPWORDS = {
 LEAKAGE_PHRASES = [
     "i'm sorry", "i cannot", "translate it into", "in english",
     "i don't know how to say", "as an ai", "i speak english",
-    "can you please translate"
+    "can you please translate", "i apologize", "as an artificial intelligence"
 ]
 
 
@@ -51,8 +54,6 @@ def detect_language_stats(text: str) -> dict[str, float]:
 
     sv_count = sum(1 for w in words if w in SWEDISH_STOPWORDS)
     en_count = sum(1 for w in words if w in ENGLISH_STOPWORDS)
-    
-    # Check Swedish diacritics å, ä, ö
     has_sv_chars = 1.0 if bool(re.search(r"[åäöÅÄÖ]", text)) else 0.0
 
     return {
@@ -90,7 +91,6 @@ def evaluate_single_response(
     has_leakage_phrase = any(phrase in resp_lower for phrase in LEAKAGE_PHRASES)
 
     if expected_language == "sv":
-        # Compliant if predominantly Swedish and not heavily English
         is_compliant = (
             (stats["sv_ratio"] > 0.15 or stats["has_sv_chars"] == 1.0)
             and stats["en_ratio"] < 0.25
@@ -101,6 +101,7 @@ def evaluate_single_response(
             stats["en_ratio"] > stats["sv_ratio"]
             or has_leakage_phrase
             or ("sorry" in resp_lower and "english" in resp_lower)
+            or ("apologize" in resp_lower and "answer" in resp_lower)
         )
     else:  # expected English
         is_compliant = (
@@ -110,27 +111,56 @@ def evaluate_single_response(
         )
         is_leakage = stats["sv_ratio"] > stats["en_ratio"]
 
-    # Check keyword coverage (recall)
-    keyword_hits = 0
-    if keywords:
-        for kw in keywords:
-            if kw.lower() in resp_lower:
-                keyword_hits += 1
-        keyword_recall = keyword_hits / len(keywords)
+    # Check keyword coverage (recall) - return None if keywords list is empty
+    if keywords and len(keywords) > 0:
+        keyword_hits = sum(1 for kw in keywords if kw.lower() in resp_lower)
+        keyword_recall = float(keyword_hits / len(keywords))
     else:
-        keyword_recall = 1.0
+        keyword_recall = None
 
     loop_flag = is_repetition_loop(response)
 
     return {
         "is_compliant": bool(is_compliant),
         "is_leakage": bool(is_leakage),
-        "keyword_recall": float(keyword_recall),
+        "keyword_recall": keyword_recall,
         "is_loop": bool(loop_flag),
         "sv_ratio": float(stats["sv_ratio"]),
         "en_ratio": float(stats["en_ratio"]),
         "word_count": int(stats["word_count"]),
     }
+
+
+def compute_perplexity(
+    model: torch.nn.Module,
+    tokenizer,
+    texts: list[str],
+    device: str = "cpu",
+) -> float:
+    """
+    Compute token-weighted cross-entropy perplexity over reference texts
+    as a metric of language model fluency and likelihood.
+    """
+    total_nll = 0.0
+    total_tokens = 0
+
+    model.eval()
+    with torch.no_grad():
+        for text in texts:
+            if not text or not text.strip():
+                continue
+            encodings = tokenizer(text.strip(), return_tensors="pt").to(device)
+            input_ids = encodings.input_ids
+            target_ids = input_ids.clone()
+            outputs = model(input_ids, labels=target_ids)
+            neg_log_likelihood = outputs.loss
+            n_tokens = max(1, input_ids.size(1) - 1)
+            total_nll += neg_log_likelihood.item() * n_tokens
+            total_tokens += n_tokens
+
+    if total_tokens == 0:
+        return 0.0
+    return float(np.exp(total_nll / total_tokens))
 
 
 def evaluate_model_on_dataset(
@@ -183,17 +213,22 @@ def evaluate_model_on_dataset(
     total = len(results)
     compliance_rate = sum(r["eval"]["is_compliant"] for r in results) / total if total > 0 else 0.0
     leakage_rate = sum(r["eval"]["is_leakage"] for r in results) / total if total > 0 else 0.0
-    avg_keyword_recall = float(np.mean([r["eval"]["keyword_recall"] for r in results])) if total > 0 else 0.0
+
+    # Ignore None keyword recalls
+    kw_vals = [r["eval"]["keyword_recall"] for r in results if r["eval"]["keyword_recall"] is not None]
+    avg_keyword_recall = float(np.mean(kw_vals)) if kw_vals else 0.0
+
     loop_rate = sum(r["eval"]["is_loop"] for r in results) / total if total > 0 else 0.0
     avg_word_count = float(np.mean([r["eval"]["word_count"] for r in results])) if total > 0 else 0.0
 
     cat_breakdown = {}
     for cat, items in category_metrics.items():
+        cat_kws = [i["keyword_recall"] for i in items if i["keyword_recall"] is not None]
         cat_breakdown[cat] = {
             "count": len(items),
             "compliance_rate": float(np.mean([i["is_compliant"] for i in items])),
             "leakage_rate": float(np.mean([i["is_leakage"] for i in items])),
-            "avg_keyword_recall": float(np.mean([i["keyword_recall"] for i in items])),
+            "avg_keyword_recall": float(np.mean(cat_kws)) if cat_kws else 0.0,
         }
 
     return {
@@ -206,4 +241,3 @@ def evaluate_model_on_dataset(
         "category_breakdown": cat_breakdown,
         "records": results,
     }
-
