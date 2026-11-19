@@ -461,8 +461,8 @@ def markdown_to_html(md_text: str) -> str:
 
 def build_pdf():
     md_file = DOCS_DIR / "research_note.md"
-    html_file = DOCS_DIR / "report.html"
-    pdf_file = DOCS_DIR / "report.pdf"
+    html_file = DOCS_DIR / "Weight_Space_Programming_SELLMA_Research_Report.html"
+    pdf_file = DOCS_DIR / "Weight_Space_Programming_SELLMA_Research_Report.pdf"
 
     if not md_file.exists():
         print(f"Error: {md_file} does not exist.")

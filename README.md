@@ -4,7 +4,7 @@
 > **Topic:** Weight-Space Programming (*Sparks of Weight-Space Programming*, Takehi et al., 2026) applied to Swedish Language Models  
 > **Target Initiative:** SE.LLMA / Linköping University / WASP  
 > **Author:** Felix Suarez  
-> **Deliverables:** [Research Note (Markdown)](docs/research_note.md) | [PDF Report](docs/report.pdf) | [AI Usage Disclosure](AI_USAGE.md) | [Quantitative Results](results/quantitative_results.json) | [Qualitative Output Examples](results/qualitative_examples.md)
+> **Deliverables:** [Research Note (Markdown)](docs/research_note.md) | [PDF Report](docs/Weight_Space_Programming_SELLMA_Research_Report.pdf) | [AI Usage Disclosure](AI_USAGE.md) | [Quantitative Results](results/quantitative_results.json) | [Qualitative Output Examples](results/qualitative_examples.md)
 
 ---
 
@@ -69,17 +69,17 @@ The investigation includes rigorous comparisons against:
 │   ├── regression_english.json    # 20 English prompts to monitor catastrophic degradation
 │   └── swedish_perplexity.json    # 12 Swedish reference sentences for fluency evaluation
 ├── docs/
-│   ├── research_note.md           # Full academic research note (Markdown)
-│   ├── report.html                # Formatted publication-ready HTML
-│   └── report.pdf                 # Final compiled PDF report (<25 MB)
+│   ├── research_note.md                                      # Full academic research note (Markdown)
+│   ├── Weight_Space_Programming_SELLMA_Research_Report.html   # Formatted publication-ready HTML
+│   └── Weight_Space_Programming_SELLMA_Research_Report.pdf    # Final compiled PDF report (<25 MB)
 ├── results/
-│   ├── quantitative_results.json  # Raw metric outputs across all conditions and seeds
-│   ├── qualitative_examples.md   # Side-by-side prompt responses across conditions
+│   ├── quantitative_results.json                             # Raw metric outputs across all conditions and seeds
+│   ├── qualitative_examples.md                              # Side-by-side prompt responses across conditions
 │   └── plots/
-│       └── comparison_metrics.png # Publication-grade visualization
+│       └── comparison_metrics.png                            # Publication-grade visualization
 ├── scripts/
-│   ├── run_all.py                 # Reproduces the entire benchmark end-to-end (M0–M5)
-│   └── generate_pdf.py            # Compiles research_note.md to report.pdf via Edge headless
+│   ├── run_all.py                                            # Reproduces the entire benchmark end-to-end (M0–M5)
+│   └── generate_pdf.py                                       # Compiles research_note.md to PDF report via Edge headless
 ├── src/
 │   ├── __init__.py
 │   ├── model_loader.py            # Deterministic model loader, commit hash, snapshotting
